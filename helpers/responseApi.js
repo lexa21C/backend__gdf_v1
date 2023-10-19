@@ -2,7 +2,7 @@ class ResponseApi{
     structure = {
         status : "success",
         message : '',
-        code : '200',
+        code : 200,
         results : null
     }
 
