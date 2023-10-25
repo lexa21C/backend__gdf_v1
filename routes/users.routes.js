@@ -10,7 +10,7 @@ const {validateEmailMiddleware, validate} = require('../middleware/validatorRegi
 router.get('/user', UserController.allUser);
 router.get('/user/show/:id_user', UserController.myUser);
 
-router.post('/user', validate,validateEmailMiddleware ,UserController.createUser);
+router.post('/user',UserController.createUser);
 router.put('/user/:id_user', UserController.UpdateUser);
 router.delete('/user/:id_user', UserController.deleteUser);
 router.get('/profileuser/:id_user', UserController.ProfileUser);
