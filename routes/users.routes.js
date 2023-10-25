@@ -5,6 +5,7 @@ const {validateEmailMiddleware, validate} = require('../middleware/validatorRegi
 
 
 
+
 //*users/////
 
 router.get('/user', UserController.allUser);
