@@ -95,24 +95,19 @@ exports.updataQuarter = async (req, res) => {
 }
 
 exports.deleteQuarter = async (req, res) => {
-    const quarterId = req.params.id;
-  
-    // Verificar si quarterId es un ObjectId válido
-    if (!quarterId || !isValidObjectId(quarterId)) {
-      return res.status(400).json({ error: 'ID de trimestre no válido' });
-    }
-  
+    const apiStructure = new ApiStructure();
     try {
-      const deletedQuarter = await Quarter.findByIdAndRemove(quarterId);
-  
-      if (!deletedQuarter) {
-        return res.status(404).json({ error: 'Trimestre no encontrado' });
-      }
-  
-      return res.status(200).json({ message: 'Trimestre eliminado exitosamente' });
-    } catch (error) {
-      console.error("Error en DeleteQuarter:", error);
-      return res.status(500).json({ error: 'Se produjo un error al eliminar el trimestre' });
+        let { quarteId } = req.params
+        await Quarter.findByIdAndDelete(quarteId)
+        apiStructure.setStatus(
+            200,
+            "succes",
+            "Artefacto eliminado Correctamente"
+        );
+        return res.json(apiStructure.toResponse());
+    } catch {
+        console.error("Error in DeleteQuarter:", error);
+        apiStructure.setStatus(500, "error", "Error delete in server");
+        return res.json(apiStructure.toResponse());
     }
-  };
-  
+}
