@@ -8,7 +8,7 @@ exports.allFormationProgram = async (req, res) => {
 
     try {
         // Utiliza una proyección para seleccionar solo los campos que deseas (id y program_name)
-        const results = await Formation_programs.find({}, 'id program_name');
+        const results = await Formation_programs.find().populate('competence');
 
         if (results.length > 0) {
             apiEstructure.setResult(results);
@@ -58,27 +58,31 @@ exports.allFormationProgramIdUser = async (req, res) => {
 
 exports.createFormstionPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
-    let { program_name, number_quarters, user, competence } = req.body;
+    console.log(req.body)
+    let {program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
 
-    const r = await Competence.findOne({ labor_competition: competence });
-    competence = r
+    // const r = await Competence.findOne({ labor_competition: competence });
+    // competence = r
 
-    const u = await User.findOne({ email: user });
-    user = u
+    // const u = await User.findOne({ email: user });
+    // user = u
 
-    await Formation_programs.create({
-        program_name, number_quarters, user, competence
-    })
-        .then((succces) => {
-            apiEstructure.setResult(succces)
-        })
-        .catch((error) => {
-            apiEstructure.setStatus(
-                error.parent || error,
-                "Error al crear un programa de formacion",
-                error.parent || error
-            );
-        });
+    const newFormation_programs = await Formation_programs.create({
+        program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence ,program_level,thematic_line
+    });
+        // .then((succces) => {
+        //     console.log(succces)
+        //     apiEstructure.setResult(succces)
+        // })
+        // .catch((error) => {
+        //     console.log(error)
+        //     apiEstructure.setStatus(
+        //         error.parent || error,
+        //         "Error al crear un programa de formacion",
+        //         error.parent || error
+        //     );
+        // });
+        apiEstructure.setResult(newFormation_programs, "Programa de formacion creado Exitosamente");
 
     res.json(apiEstructure.toResponse());
 }
@@ -147,16 +151,32 @@ exports.deleteFormationPrograms = async (req, res) => {
 //     res.json(apiEstructure.toResponse());
 // }
 
+// exports.myformationprograms = async (req, res) => {
+//     let apiStructure = new estructuraApi();
+//     let { idformation_programs } = req.params;
+
+//     const thematics = await Formation_programs.find({ thematic_line: idformation_programs })
+//     if (thematics.length > 0) {
+//         apiStructure.setResult(thematics)
+//     } else {
+//         apiStructure.setStatus(404, "NOt found")
+//     }
+
+//     res.json(apiStructure.toResponse())
+// }
+
+
 exports.myformationprograms = async (req, res) => {
     let apiStructure = new estructuraApi();
-    let { idformation_programs } = req.params;
+    let { id_formation_programs } = req.params;
 
-    const thematics = await Formation_programs.find({ thematic_line: idformation_programs })
-    if (thematics.length > 0) {
-        apiStructure.setResult(thematics)
-    } else {
-        apiStructure.setStatus(404, "NOt found")
-    }
+    const thematics = await Formation_programs.findById({ _id: id_formation_programs })
+    apiStructure.setResult(thematics)
+    console.log(thematics)
+    // if (thematics.length > 0) {
+    // } else {
+    //     apiStructure.setStatus(404, "NOt found")
+    // }
 
     res.json(apiStructure.toResponse())
 }
