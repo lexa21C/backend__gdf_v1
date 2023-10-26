@@ -128,6 +128,7 @@ exports.updateArtiffacts = async (req, res) => {
 }
 exports.deleteArtifact = async (req, res) => {
     const { idArtiffacts } = req.params
+    console.log(idArtiffacts)
     let apiStructure = new ApiStructure()
     await Artiffacts.findByIdAndDelete({ _id: idArtiffacts }).then(async (success) => {
         apiStructure.setResult(success, "Artefacto eliminado Correctamente")
