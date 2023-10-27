@@ -2,11 +2,12 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 
 var Formation_program = Schema({
-    _id:String,
     program_name: String,
     number_quarters: Number,
     total_duration:String,
     Program_version:String,
+    Fecha_inicio_programa: String,
+    Fecha_fin_programa: String,
     competence : [{
         ref: "Competences",
         type: mongoose.Schema.Types.Number,

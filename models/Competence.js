@@ -5,9 +5,12 @@ var Schema = mongoose.Schema;
 var Competence = Schema(
   {
     _id:String,
-    name: String,
+    labor_competition: String,
+    labor_competence_code: String,
+    competition_name: String,
+    labor_competition_version: String,
+    maximun_duration: String,
     quarter: Number,
-
     program: [
       {
         ref: "Formation_programs",

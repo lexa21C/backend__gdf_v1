@@ -10,6 +10,6 @@ router.get('/formation_programs/show/:id_formation_programs', FormationPrograms.
 router.post('/formation_programs', FormationPrograms.createFormstionPrograms)
 router.put('/formation_programs/:id_formation_programs', FormationPrograms.updateFormationPrograms)
 router.delete('/formation_programs/:id_formation_programs', FormationPrograms.deleteFormationPrograms)
-router.get('/formation_programs/:idformation_programs', FormationPrograms.myformationprograms)
+router.get('/formation_program/:id_formation_programs', FormationPrograms.myformationprograms)
 
 module.exports = router;

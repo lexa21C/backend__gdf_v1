@@ -6,8 +6,7 @@ const Artiffacts = require('../models/Artiffacts.js')
 exports.allCompentences = async (req, res) => {
     let apiStructure = new ApiStructure();
 
-    const competences = await Competence.find({}).lean()
-
+    const competences = await Competence.find({}).populate('program')
     if (competences.length > 0) {
         apiStructure.setResult(competences)
     } else {
@@ -34,20 +33,20 @@ exports.competenceId = async (req, res) => {
 
 exports.createCompetences = async (req, res) => {
     let apiStructure = new ApiStructure();
-    let { name, quarter, formation_programs } = req.body;
+    let { _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
 
-    let arrayF = []
-    for (let i = 0; i < formation_programs.length; i++) {
-        const foundformation_programs = await Formation_programs.findOne({ program_name: formation_programs[i] })
+    // let arrayF = []
+    // for (let i = 0; i < formation_programs.length; i++) {
+    //     const foundprogram= await Formation_programs.findOne({ program_name: formation_programs[i] })
 
-        arrayF.push(foundformation_programs._id)
+    //     arrayF.push(foundformation_programs._id)
 
-    }
-    formation_programs = arrayF
-    // const foundformation_programs = await Formation_programs.findOne({name : "ADSO"})
+    // }
+    // program= arrayF
+    // const foundprogram= await Formation_programs.findOne({name : "ADSO"})
     // res.json(foundformation_programs._id)
 
-    await Competence.create({ name, quarter, formation_programs })
+    await Competence.create({ _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program})
         .then(async (success) => {
             apiStructure.setResult(success)
 
@@ -103,3 +102,17 @@ exports.compoetenceByFormation = async (req, res) => {
 
 
 }
+
+// exports.updateCompetences = async (req, res) => {
+//     let apiEstructure = new ApiStructure();
+//     let id_competence = req.params.id_competence;
+//     let competenceUpdate = req.body;
+
+//     const competence = await Competence.findById({_id: id_competence});
+//     if (competence){
+//         apiEstructure.setResult('Actualizado')
+//     }else {
+//         apiEstructure.setResult(404, "info","No exite la competencia")
+//     }
+//     await  Competence.findByIdAndUpdate(id_competence, {})
+// }
