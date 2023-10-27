@@ -126,6 +126,7 @@ exports.updateArtiffacts = async (req, res) => {
     );
     res.json(apiStructure.toResponse())
 }
+
 exports.deleteArtifact = async (req, res) => {
     const { idArtiffacts } = req.params
     let apiStructure = new ApiStructure()
