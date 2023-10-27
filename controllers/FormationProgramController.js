@@ -70,6 +70,8 @@ exports.createFormstionPrograms = async (req, res) => {
     const newFormation_programs = await Formation_programs.create({
         program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence ,program_level,thematic_line
     });
+    console.log('new formation_programs')
+    console.log(newFormation_programs)
         // .then((succces) => {
         //     console.log(succces)
         //     apiEstructure.setResult(succces)

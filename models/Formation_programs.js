@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 
 var Formation_program = Schema({
+    _id:String,
     program_name: String,
     number_quarters: Number,
     total_duration:String,
