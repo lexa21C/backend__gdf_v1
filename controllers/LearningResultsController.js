@@ -77,8 +77,6 @@ exports.UpdateResults = async(req, res) => {
     const result = await Learning_results.findById({ _id: code })
   
     if(result){
-        console.log('encontro el resultado')
-        console.log(result)
         apiStructure.setResult("Resultado de Aprendizaje Actualizado Correctamente")
     }else {
         apiStructure.setStatus(404, "Info", "No existe el Resultado de Aprendizaje")
@@ -88,7 +86,7 @@ exports.UpdateResults = async(req, res) => {
     await Learning_results.findByIdAndUpdate(code, {   
          learning_result: reqResult.learning_result,
          competence: reqResult.competence
-    }).then(async (success) => {
+    }, {new: true}).then(async (success) => {
         apiStructure.setResult(success, "Resultado de Aprendizaje Actualizado con Éxito")
     }).catch((err) => {
     //     apiStructure.setStatus(
@@ -106,5 +104,21 @@ exports.UpdateResults = async(req, res) => {
     // await newData.save()
     // apiStructure.setStatus("success", 200,  "Resultado de Aprendizaje Actualizado con Éxito");
 
+    res.json(apiStructure.toResponse())
+}
+
+exports.deleteResults = async (req, res)=>{
+    let apiStructure = new ApiStructure();
+    try {
+        const id_result = req.params.code;
+        const learning_result =  await Learning_results.findByIdAndDelete({_id: id_result});
+        if(learning_result){
+            apiStructure.setResult('Eliminado')
+        } else {
+            apiStructure.setResult(404, "info", "No exite el resultado de aprendizaje ")
+        }
+    } catch (error){
+
+    }
     res.json(apiStructure.toResponse())
 }

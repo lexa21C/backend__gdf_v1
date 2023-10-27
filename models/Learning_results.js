@@ -5,7 +5,6 @@ var Schema = mongoose.Schema
 var Result = Schema({
     _id: String,
     learning_result: String,
-    
     competence:[{
         res:"Competence",
         type: Schema.Types.String

@@ -15,7 +15,23 @@ exports.allCompentences = async (req, res) => {
 
     res.json(apiStructure.toResponse())
 }
+exports.allCompentence = async (req, res) => {
+    let apiStructure = new ApiStructure();
+    try {
+        let id_competence = req.params.id_competence;
+        const competence = await Competence.find({_id: id_competence}) 
+        if(competence.length > 0){
+            console.log('error')
+            apiStructure.setResult(competence)
+        } else {
+            apiStructure.setStatus(404, 'No hay competencias')
+        }
+    } catch (error){
 
+    }
+    
+    res.json(apiStructure.toResponse())
+}
 exports.competenceId = async (req, res) => {
     let apiEstructure = new ApiStructure();
     let id_competences = req.params.id_competence;
@@ -29,7 +45,6 @@ exports.competenceId = async (req, res) => {
     }
     res.json(apiEstructure.toResponse())
 }
-
 
 exports.createCompetences = async (req, res) => {
     let apiStructure = new ApiStructure();
@@ -102,6 +117,70 @@ exports.compoetenceByFormation = async (req, res) => {
 
 
 }
+
+exports.updateCompetences = async (req, res) => {
+    let apiStructure = new ApiStructure();
+    let id_competence = req.params.id_competence
+    try {
+
+        let { _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
+        // const competence = await Competence.findById({_id: id_competence})
+        // if(!competence){
+        //     apiStructure.setResult()
+        // }
+    
+        const competenceUpdate = await Competence.findByIdAndUpdate(
+            {_id:id_competence},
+            {_id: _id,  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program},
+            {new: true}  
+            )
+        if (competenceUpdate){
+            apiStructure.setResult(competenceUpdate,"Actualizado")
+        } else {
+            apiStructure.setStatus(404, "info", "No se  encuentra la competencia ")
+        }
+    } catch {
+
+
+    }
+
+
+    res.json(apiStructure.toResponse())
+}
+
+exports.deleteCompetence = async (req, res) => {
+    let apiStructure = new ApiStructure();
+   
+    try {
+        let id_competence = req.params.id_competence;
+        const competence = await Competence.findByIdAndDelete({_id: id_competence});
+        if (competence) {
+            apiStructure.setResult("eliminado")
+        }else{
+            apiStructure.setStatus(404, "info", "NO existe la competencia")
+
+        }
+    }catch (error){
+
+    }
+    res.json(apiStructure.toResponse())
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // exports.updateCompetences = async (req, res) => {
 //     let apiEstructure = new ApiStructure();

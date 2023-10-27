@@ -3,7 +3,7 @@ const estructuraApi = require('../helpers/responseApi.js');
 const Competence = require('../models/Competence.js')
 const User = require('../models/Users.js')
 var Level=require("../models/Program_levels.js")
-exports.allFormationProgram = async (req, res) => {
+exports.allFormationPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
 
     try {
@@ -22,6 +22,7 @@ exports.allFormationProgram = async (req, res) => {
 
     res.json(apiEstructure.toResponse());
 }
+
 
 exports.allFormationProgramIdUser = async (req, res) => {
     let apiEstructure = new estructuraApi();
@@ -59,7 +60,7 @@ exports.allFormationProgramIdUser = async (req, res) => {
 exports.createFormstionPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
     console.log(req.body)
-    let {program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
+    let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
 
     // const r = await Competence.findOne({ labor_competition: competence });
     // competence = r
@@ -68,7 +69,7 @@ exports.createFormstionPrograms = async (req, res) => {
     // user = u
 
     const newFormation_programs = await Formation_programs.create({
-        program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence ,program_level,thematic_line
+       _id: _id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence ,program_level,thematic_line
     });
     console.log('new formation_programs')
     console.log(newFormation_programs)
@@ -107,35 +108,46 @@ exports.formation_programsbyid = async (req, res) => {
 exports.updateFormationPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
     let id_formation_programs = req.params.id_formation_programs;
-    let reqformation = req.body;
+    try {
 
-    const formation_programs = await Formation_programs.findById({ _id: id_formation_programs });
+        let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
+        // const formation_programs = await Formation_programs.findById({ _id: id_formation_programs });
+    
+        const formation_program_update = await Formation_programs.findByIdAndUpdate(
+            {_id:id_formation_programs},  
+            {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line },
+            {new: true}
+            );
+        if (formation_program_update) {
+            apiEstructure.setResult(formation_program_update,"Actualizado")
+        } else {
+            apiEstructure.setStatus(404, "Info", "No existe el programa de formacion")
+        }
+    }catch{
 
-    if (formation_programs) {
-        apiEstructure.setResult("Actualizado")
-    } else {
-        apiEstructure.setStatus(404, "Info", "No existe el prgrama de formacion")
     }
 
-    await Formation_programs.findByIdAndUpdate(id_formation_programs, {
-        name: reqformation.name,
-        number_quarters: reqformation.number_quarters
-    });
     res.json(apiEstructure.toResponse());
 }
 
 exports.deleteFormationPrograms = async (req, res) => {
+   
     let apiEstructure = new estructuraApi();
-    let id_formation_programs = req.params.id_formation_programs;
+    try {
 
-    const formation_programs = await Formation_programs.findById({ _id: id_formation_programs })
-    if (formation_programs) {
-        apiEstructure.setResult("Eliminado")
-    } else {
-        apiEstructure.setStatus(404, "info", "NO existe el usuario")
+        let id_formation_programs = req.params.id_formation_programs;
+    
+        const formation_programs = await Formation_programs.findById({ _id: id_formation_programs })
+        if (formation_programs) {
+            apiEstructure.setResult("Eliminado")
+        } else {
+            apiEstructure.setStatus(404, "info", "NO existe el usuario")
+        }
+    
+        await Formation_programs.findByIdAndDelete({ _id: id_formation_programs });
+    } catch (error){
+
     }
-
-    await Formation_programs.findByIdAndDelete({ _id: id_formation_programs });
     res.json(apiEstructure.toResponse());
 
 }
@@ -168,7 +180,7 @@ exports.deleteFormationPrograms = async (req, res) => {
 // }
 
 
-exports.myformationprograms = async (req, res) => {
+exports.allFormationProgram = async (req, res) => {
     let apiStructure = new estructuraApi();
     let { id_formation_programs } = req.params;
 
