@@ -5,6 +5,7 @@ const ApiStructure = require('../helpers/responseApi.js');
 const validateLoginMiddleware = async (req, res, next) => {
   const { email, password } = req.body;
   const apiStructure = new ApiStructure();
+  console.log(req.body)
 
   // Verifica que se proporcionen email y password en la solicitud
   if (!email || !password) {

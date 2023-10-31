@@ -96,10 +96,11 @@ exports.formation_programsbyid = async (req, res) => {
 
 
     const formation_programs = await Formation_programs.find({ _id: id_formation_programs });
-
-    if (formation_programs) {
+    console.log(formation_programs)
+    if (formation_programs.length > 0) {
         apiEstructure.setResult(formation_programs)
     } else {
+        console.log('error')
         apiEstructure.setStatus(404, "info", "No existe el programa de formacion")
     }
     res.json(apiEstructure.toResponse())

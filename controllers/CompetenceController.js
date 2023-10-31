@@ -21,7 +21,6 @@ exports.allCompentence = async (req, res) => {
         let id_competence = req.params.id_competence;
         const competence = await Competence.find({_id: id_competence}) 
         if(competence.length > 0){
-            console.log('error')
             apiStructure.setResult(competence)
         } else {
             apiStructure.setStatus(404, 'No hay competencias')
@@ -48,8 +47,8 @@ exports.competenceId = async (req, res) => {
 
 exports.createCompetences = async (req, res) => {
     let apiStructure = new ApiStructure();
-    let { _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
-
+    let {  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
+    let _id = labor_competence_code  
     // let arrayF = []
     // for (let i = 0; i < formation_programs.length; i++) {
     //     const foundprogram= await Formation_programs.findOne({ program_name: formation_programs[i] })
@@ -68,7 +67,7 @@ exports.createCompetences = async (req, res) => {
         })
         .catch((err) => {
             apiStructure.setStatus(
-                "NO se pudo registrar la competencia",
+                "No fue posible registrar la competencia",
                 500,
                 err._message
 
@@ -129,12 +128,15 @@ exports.updateCompetences = async (req, res) => {
         //     apiStructure.setResult()
         // }
     
+        console.log(('competence udpated'))
         const competenceUpdate = await Competence.findByIdAndUpdate(
             {_id:id_competence},
-            {_id: _id,  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program},
+            {_id: labor_competence_code,  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program},
             {new: true}  
             )
-        if (competenceUpdate){
+        console.log(competenceUpdate)   
+        if (competenceUpdate.length > 0){
+            console.log(competenceUpdate)
             apiStructure.setResult(competenceUpdate,"Actualizado")
         } else {
             apiStructure.setStatus(404, "info", "No se  encuentra la competencia ")

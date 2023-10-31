@@ -3,7 +3,7 @@ const ApiStructure = require('../helpers/responseApi.js');
 const Profile = require("../models/Profiles.js");
 const Tematic =  require("../models/Thematic_lines.js")
 const { body, validationResult } = require("express-validator");
-const { encrypt } = require("../helpers/Bycript.js");
+const { encrypt } = require("../helpers/Bycript");
 const { validateProfileExistence } = require('../helpers/user/registar/profileValidation.js'); 
 
 //Listar usuarios
@@ -23,7 +23,7 @@ exports.allUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   let apiStructure = new ApiStructure();
-  let { complete_names, email, password, type_profile, thematic_lines, formation_program, training_center } = req.body;
+  let { complete_names, email, password, type_profile, formation_program, training_center } = req.body;
   const errors = validationResult(req);
   
   if (!errors.isEmpty()) {
@@ -42,7 +42,6 @@ exports.createUser = async (req, res) => {
       email,
       password: passwordHash,
       type_profile: existingProfile, // Asegúrate de asignar el perfil existente
-      thematic_lines,
       formation_program,
       training_center
     });
