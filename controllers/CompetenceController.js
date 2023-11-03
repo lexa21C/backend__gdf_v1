@@ -48,7 +48,7 @@ exports.competenceId = async (req, res) => {
 exports.createCompetences = async (req, res) => {
     let apiStructure = new ApiStructure();
     let {  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
-    let _id = labor_competence_code  
+    let _id =  labor_competence_code
     // let arrayF = []
     // for (let i = 0; i < formation_programs.length; i++) {
     //     const foundprogram= await Formation_programs.findOne({ program_name: formation_programs[i] })

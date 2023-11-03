@@ -60,8 +60,8 @@ exports.allFormationProgramIdUser = async (req, res) => {
 exports.createFormstionPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
     console.log(req.body)
-    let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
-
+    let {program_name, number_quarters,total_duration, Program_version,program_start_date,program_end_date, competence, program_level,thematic_line } = req.body;
+    let _id  = parseInt(number_quarters)
     // const r = await Competence.findOne({ labor_competition: competence });
     // competence = r
 
@@ -69,23 +69,21 @@ exports.createFormstionPrograms = async (req, res) => {
     // user = u
 
     const newFormation_programs = await Formation_programs.create({
-       _id: _id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence ,program_level,thematic_line
-    });
-    console.log('new formation_programs')
-    console.log(newFormation_programs)
-        // .then((succces) => {
-        //     console.log(succces)
-        //     apiEstructure.setResult(succces)
-        // })
-        // .catch((error) => {
-        //     console.log(error)
-        //     apiEstructure.setStatus(
-        //         error.parent || error,
-        //         "Error al crear un programa de formacion",
-        //         error.parent || error
-        //     );
-        // });
-        apiEstructure.setResult(newFormation_programs, "Programa de formacion creado Exitosamente");
+       _id, program_name, number_quarters,total_duration, Program_version,program_start_date,program_end_date, competence ,program_level,thematic_line
+    })
+        .then((succces) => {
+            console.log(succces)
+            apiEstructure.setResult(succces)
+        })
+        .catch((error) => {
+            console.log(error)
+            apiEstructure.setStatus(
+                error.parent || error,
+                "Error al crear un programa de formacion",
+                error.parent || error
+            );
+        });
+        // apiEstructure.setResult(newFormation_programs, "Programa de formacion creado Exitosamente");
 
     res.json(apiEstructure.toResponse());
 }
@@ -111,7 +109,7 @@ exports.updateFormationPrograms = async (req, res) => {
     let id_formation_programs = req.params.id_formation_programs;
     try {
 
-        let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line } = req.body;
+        let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,program_end_date, competence, program_level,thematic_line } = req.body;
         // const formation_programs = await Formation_programs.findById({ _id: id_formation_programs });
     
         const formation_program_update = await Formation_programs.findByIdAndUpdate(

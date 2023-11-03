@@ -1,16 +1,15 @@
 const { check, validationResult } = require('express-validator');
-const userModel = require('../models/Users.js');
-const ApiStructure = require('../helpers/responseApi.js');
+const userModel = require('../../models/Users.js');
+const ApiStructure = require('../../helpers/responseApi.js');
 
 const validateLoginMiddleware = async (req, res, next) => {
   const { email, password } = req.body;
   const apiStructure = new ApiStructure();
   console.log(req.body)
-
+  console.log('validateLoginMiddleware')
   // Verifica que se proporcionen email y password en la solicitud
   if (!email || !password) {
     apiStructure.setStatus("Failed", 400, 'Debe proporcionar un email y una contraseña.');
-    console.log(email,password)
     return res.status(400).json(apiStructure.toResponse());
   }
 
@@ -34,15 +33,15 @@ const validateLoginMiddleware = async (req, res, next) => {
 };
 
 
-function validate(req, res, next) {
-    
+const validate = async (req, res, next) => {
+    console.log('-------------------------------------------------------------')
     // Define aquí tus reglas de validación personalizadas
-    const customValidationRules = [
+    const  customValidationRules= [
       check("email")
-        .notEmpty().withMessage('El campo "email" es obligatorio')
-        .isEmail().withMessage('El correo electrónico no es válido'),
+        .notEmpty().withMessage('El campo de  "correo electrónico" es requerido')
+        .isEmail().withMessage('El correo  electrónico no es válido'),
       check("password")
-        .notEmpty().withMessage('El campo "type_profile" es obligatorio')
+        .notEmpty().withMessage('El campo de "contraseña" es requerido')
     ];
   
     // Ejecuta las reglas de validación personalizadas

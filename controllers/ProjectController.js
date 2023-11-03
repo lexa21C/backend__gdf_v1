@@ -26,6 +26,7 @@ exports.allProjects = async (req, res) => {
     res.json(apiEstructure.toResponse());
 }
 
+
 exports.allProjectsByRecords = async (req, res) => {
     let apiEstructure = new estructureApi();
 

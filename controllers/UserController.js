@@ -75,7 +75,7 @@ exports.UpdateUser = async (req, res) => {
   const { complete_names, email, password, type_profile, formation_program } = req.body
   const {id_user} = req.params;
   let apiStructure = new ApiStructure();
- 
+ console.log(req.body)
   if (password){
     const passwordHash = await encrypt(password);
     await User.findByIdAndUpdate(id_user, {

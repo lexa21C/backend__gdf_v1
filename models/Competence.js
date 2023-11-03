@@ -6,10 +6,10 @@ var Competence = Schema(
   {
     _id:String,
     labor_competition: String,
-    labor_competence_code: String,
+    labor_competence_code: Number,
     competition_name: String,
     labor_competition_version: String,
-    maximun_duration: String,
+    estimated_duration: String,
     quarter: Number,
     program: [
       {

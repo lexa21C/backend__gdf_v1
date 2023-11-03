@@ -2,7 +2,7 @@ const router = require('express').Router();
 const {checkAuth} = require('../middleware/auth.js')
 
 const ProjectController = require('../controllers/ProjectController.js')
-const {validate} = require('../middleware/project.middleware.js');
+const {validate} = require('../middleware/project/project.middleware.js');
 
 
 
