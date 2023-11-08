@@ -4,6 +4,7 @@ var Schema = mongoose.Schema
 var Formation_program = Schema({
     _id:String,
     program_name: String,
+    program_code: Number,
     number_quarters: Number,
     total_duration:String,
     Program_version:String,

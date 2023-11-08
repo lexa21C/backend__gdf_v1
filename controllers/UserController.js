@@ -69,42 +69,47 @@ exports.myUser = async (req, res) => {
   }
   res.json(apiStructure.toResponse());
 };
-
 //Actualizar usuario
 exports.UpdateUser = async (req, res) => {
-  const { complete_names, email, password, type_profile, formation_program } = req.body
-  const {id_user} = req.params;
+  const { complete_names, email, password, type_profile, formation_program } = req.body;
+  const { id_user } = req.params;
   let apiStructure = new ApiStructure();
- console.log(req.body)
-  if (password){
-    const passwordHash = await encrypt(password);
-    await User.findByIdAndUpdate(id_user, {
-      complete_names, email, password: passwordHash, type_profile, formation_program
-    }).then(async (success) => {
-      apiStructure.setResult(success, "Usuario Actualizado Exitosamente")
-    }).catch((err) => {
-      apiStructure.setStatus(
-        "Failed",
-        400,
-        err.message,
-      )
-    })
-  } else {
-    await User.findByIdAndUpdate(id_user, {
-      complete_names, email, type_profile, formation_program
-    }).then(async (success) => {
-      apiStructure.setResult(success, "Usuario Actualizado Exitosamente")
-    }).catch((err) => {
-      apiStructure.setStatus(
-        "Failed",
-        400,
-        err.message,
-      )
-    })
 
+  try {
+    // Check if the new email already exists in the database
+    const existingUser = await User.findOne({ email: email, _id: { $ne: id_user } });
+    if (existingUser) {
+      console.log("existe")
+      apiStructure.setStatus("Failed", 400, "Email already exists");
+      return res.json(apiStructure.toResponse());
+    }
+
+    if (password) {
+      const passwordHash = await encrypt(password);
+      await User.findByIdAndUpdate(id_user, {
+        complete_names,
+        email,
+        password: passwordHash,
+        type_profile,
+        formation_program,
+      });
+    } else {
+      await User.findByIdAndUpdate(id_user, {
+        complete_names,
+        email,
+        type_profile,
+        formation_program,
+      });
+    }
+
+    apiStructure.setResult({}, "Usuario Actualizado Exitosamente");
+    res.json(apiStructure.toResponse());
+  } catch (err) {
+    apiStructure.setStatus("Failed", 400, err.message);
+    res.json(apiStructure.toResponse());
   }
-  res.json(apiStructure.toResponse())
-}
+};
+
 
 //Eliminar usuario
 exports.deleteUser = async (req, res) => {

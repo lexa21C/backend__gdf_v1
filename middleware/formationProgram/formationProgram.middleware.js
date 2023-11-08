@@ -1,6 +1,18 @@
 const { check, validationResult} = require('express-validator');
-const Competence = require("../../models/Competence.js");
+const Formation_program = require("../../models/Formation_programs.js");
 const ApiStruture = require("../../helpers/responseApi.js");
+async function validateCodeUniqueness(req, res, next) {
+    const { labor_competence_code } = req.body;
+    let apiStructure = new ApiStruture();
+    const existingCode = await Competence.findOne({ labor_competence_code });
+    if (existingCode) {
+        apiStructure.setStatus("Failed", 400, `Lo sentimos, el código de competencia laboral '${labor_competence_code}' ya está en uso. Por favor, elija un código único.`);
+        return res.json(apiStructure.toResponse());
+    }  
+    // Si el código de competencia laboral no está duplicado y el perfil existe, pasa al siguiente middleware o al controlador
+    next();
+    
+}
 
 
 const validateFormationProgram = async (req, res, next) => {
