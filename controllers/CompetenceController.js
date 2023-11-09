@@ -47,8 +47,7 @@ exports.competenceId = async (req, res) => {
 
 exports.createCompetences = async (req, res) => {
     let apiStructure = new ApiStructure();
-    let {  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
-    let _id =  labor_competence_code
+    let {  labor_competition,labor_competence_code,competition_name,labor_competition_versio,estimated_duration, quarter, program} = req.body;
     // let arrayF = []
     // for (let i = 0; i < formation_programs.length; i++) {
     //     const foundprogram= await Formation_programs.findOne({ program_name: formation_programs[i] })
@@ -60,19 +59,13 @@ exports.createCompetences = async (req, res) => {
     // const foundprogram= await Formation_programs.findOne({name : "ADSO"})
     // res.json(foundformation_programs._id)
 
-    await Competence.create({ _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program})
-        .then(async (success) => {
-            apiStructure.setResult(success)
-
-        })
-        .catch((err) => {
-            apiStructure.setStatus(
-                "No fue posible registrar la competencia",
-                500,
-                err._message
-
-            );
-        });
+    try {
+        const success = await Competence.create({  labor_competition, labor_competence_code, competition_name, labor_competition_versio, estimated_duration, quarter, program });
+        apiStructure.setResult(success);
+    } catch (err) {
+        apiStructure.setStatus("No fue posible registrar la competencia", 500, err.message);
+    }
+    
     res.json(apiStructure.toResponse())
 }
 
@@ -122,7 +115,7 @@ exports.updateCompetences = async (req, res) => {
     let id_competence = req.params.id_competence
     try {
 
-        let { _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program} = req.body;
+        let { _id, labor_competition,labor_competence_code,competition_name,labor_competition_versio,estimated_duration, quarter, program} = req.body;
         // const competence = await Competence.findById({_id: id_competence})
         // if(!competence){
         //     apiStructure.setResult()
@@ -131,7 +124,7 @@ exports.updateCompetences = async (req, res) => {
         console.log(('competence udpated'))
         const competenceUpdate = await Competence.findByIdAndUpdate(
             {_id:id_competence},
-            {_id: labor_competence_code,  labor_competition,labor_competence_code,competition_name,labor_competition_versio,maximun_duration, quarter, program},
+            {_id: labor_competence_code,  labor_competition,labor_competence_code,competition_name,labor_competition_versio,estimated_duration, quarter, program},
             {new: true}  
             )
         console.log(competenceUpdate)   
@@ -151,23 +144,24 @@ exports.updateCompetences = async (req, res) => {
 }
 
 exports.deleteCompetence = async (req, res) => {
-    let apiStructure = new ApiStructure();
-   
+    const apiStructure = new ApiStructure();
+
     try {
-        let id_competence = req.params.id_competence;
-        const competence = await Competence.findByIdAndDelete({_id: id_competence});
+        const { id_competence } = req.params;
+        const competence = await Competence.findByIdAndDelete(id_competence);
+
         if (competence) {
-            apiStructure.setResult("eliminado")
-        }else{
-            apiStructure.setStatus(404, "info", "NO existe la competencia")
-
+            apiStructure.setResult("Competencia eliminada correctamente");
+        } else {
+            apiStructure.setStatus(404, "Info", "No existe la competencia");
         }
-    }catch (error){
-
+    } catch (error) {
+        console.error("Error al eliminar la competencia:", error);
+        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al eliminar la competencia.");
     }
-    res.json(apiStructure.toResponse())
-}
 
+    res.json(apiStructure.toResponse());
+};
 
 
 

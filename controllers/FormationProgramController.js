@@ -60,8 +60,8 @@ exports.allFormationProgramIdUser = async (req, res) => {
 exports.createFormstionPrograms = async (req, res) => {
     let apiEstructure = new estructuraApi();
     console.log(req.body)
-    let {program_name, number_quarters,total_duration, Program_version,program_start_date,program_end_date, competence, program_level,thematic_line } = req.body;
-    let _id  = parseInt(number_quarters)
+    let {program_name, program_code,total_duration, Program_version,program_start_date,program_end_date, competence, program_level,thematic_line } = req.body;
+
     // const r = await Competence.findOne({ labor_competition: competence });
     // competence = r
 
@@ -69,7 +69,7 @@ exports.createFormstionPrograms = async (req, res) => {
     // user = u
 
     const newFormation_programs = await Formation_programs.create({
-       _id, program_name, number_quarters,total_duration, Program_version,program_start_date,program_end_date, competence ,program_level,thematic_line
+        program_name, program_code,total_duration, Program_version,program_start_date,program_end_date, competence ,program_level,thematic_line
     })
         .then((succces) => {
             console.log(succces)
@@ -109,12 +109,12 @@ exports.updateFormationPrograms = async (req, res) => {
     let id_formation_programs = req.params.id_formation_programs;
     try {
 
-        let {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,program_end_date, competence, program_level,thematic_line } = req.body;
+        let {_id, program_name, program_code,total_duration, Program_version,program_start_date,program_end_date, competence, program_level,thematic_line} = req.body;
         // const formation_programs = await Formation_programs.findById({ _id: id_formation_programs });
     
         const formation_program_update = await Formation_programs.findByIdAndUpdate(
             {_id:id_formation_programs},  
-            {_id, program_name, number_quarters,total_duration, Program_version,Fecha_inicio_programa,Fecha_fin_programa, competence, program_level,thematic_line },
+            {_id,program_name, program_code,total_duration, Program_version,program_start_date,program_end_date, competence, program_level,thematic_line },
             {new: true}
             );
         if (formation_program_update) {
@@ -123,11 +123,14 @@ exports.updateFormationPrograms = async (req, res) => {
             apiEstructure.setStatus(404, "Info", "No existe el programa de formacion")
         }
     }catch{
+        console.error("Error al actualizar el programa de formación:", error);
+        apiEstructure.setStatus(500, "Error interno", "Ocurrió un error interno al actualizar el programa de formación.");
 
     }
 
     res.json(apiEstructure.toResponse());
 }
+
 
 exports.deleteFormationPrograms = async (req, res) => {
    
