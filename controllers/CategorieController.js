@@ -1,41 +1,49 @@
 const Categories = require('../models/Categories.js');
 const estructureApi = require('../helpers/responseApi.js');
+exports.allCategories = async (req, res) => {
+  try {
+      const apiStructure = new estructureApi();
+      const categories = await Categories.find({});
 
-exports.allCategories = async(req, res) => {
-    let apiEstructure = new estructureApi();
+      if (categories.length > 0) {
+          apiStructure.setResult(categories, "Operación completada exitosamente");
+      } else {
+          apiStructure.setStatus(404, "Info", "No se encontraron categorías");
+      }
 
-    const categories = await Categories.find({})
+      res.json(apiStructure.toResponse());
+  } catch (error) {
+      console.error("Error en allCategories:", error);
+      const apiStructure = new estructureApi();
+      apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
+      res.json(apiStructure.toResponse());
+  }
+};
 
-    if(categories.length > 0){
-    apiEstructure.setResult(categories)
-}else {
-    apiEstructure.setStatus(404, "Info", "No hay categorias")
-}
-
-res.json(apiEstructure.toResponse());
-}
 exports.createCategory = async (req, res) => {
-  let apiEstructure = new estructureApi();
+  const apiStructure = new estructureApi();
   const { name } = req.body;
 
   try {
-   //^ Comprobar si el nombre de la categoría ya existe en la base de datos (sin distinción entre mayúsculas y minúsculas)
+    // Comprobar si el nombre de la categoría ya existe en la base de datos (sin distinción entre mayúsculas y minúsculas)
     const existingCategory = await Categories.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
 
     if (existingCategory) {
-      //^ Devuelve una respuesta de error si el nombre no es único
-      apiEstructure.setStatus("Failed", 400, `El nombre de la categoría '${name}' ya existe`);
+      // Devuelve una respuesta de error si el nombre no es único
+      apiStructure.setStatus("error", 409, `La categoría '${name}' ya existe`);
     } else {
-      //^ Crea la categoría si el nombre es único
-      await Categories.create({ name: name.toLowerCase() }); //^ Convierte el nombre de la categoría a minúsculas
-      apiEstructure.setResult(null, "Categoría creada exitosamente");
+      // Crea la categoría si el nombre es único
+      await Categories.create({ name: name.toLowerCase() }); // Convierte el nombre de la categoría a minúsculas
+      apiStructure.setResult(null, "Categoría creada exitosamente");
     }
   } catch (err) {
-    apiEstructure.setStatus("Failed", 400, err.message);
+    console.error("Error en createCategory:", err);
+    apiStructure.setStatus("error", 500, "Ocurrió un error  al procesar la solicitud");
   }
 
-  res.json(apiEstructure.toResponse());
+  res.json(apiStructure.toResponse());
 };
+
 
 
 exports.updateCategory = async (req, res) => {
@@ -75,17 +83,22 @@ exports.updateCategory = async (req, res) => {
 
 
 exports.deleteCategory = async (req, res) => {
-    let apiEstructure = new estructureApi();
-    let id_category = req.params.id_category;
+  const apiStructure = new estructureApi();
+  const id_category = req.params.id_category;
 
-    const category = await Categories.findById({ _id: id_category});
-    
-    if(category){
-        apiEstructure.setResult("Categoria Eliminada")
-    }else {
-        apiEstructure.setStatus(404, "Info", "No existe la categoria")
-    }
-    await Categories.findByIdAndDelete({ _id: id_category})
-    res.json(apiEstructure.toResponse());
+  try {
+      const category = await Categories.findById(id_category);
 
-}
+      if (!category) {
+          apiStructure.setStatus(404, "Info", "No existe la categoría");
+      } else {
+          await Categories.findByIdAndDelete(id_category);
+          apiStructure.setResult(null, "Categoría eliminada exitosamente");
+      }
+  } catch (error) {
+      console.error("Error en deleteCategory:", error);
+      apiStructure.setStatus("error", 500, "Ocurrió un error interno al procesar la solicitud");
+  }
+
+  res.json(apiStructure.toResponse());
+};

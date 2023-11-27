@@ -15,7 +15,7 @@ class ResponseApi{
     }
 
     setResult = (ressult,message) => {
-        this.structure.results = ressult
+        this.structure.results = ressult;
         this.structure.message = message;
 
     }

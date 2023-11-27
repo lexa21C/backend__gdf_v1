@@ -17,8 +17,7 @@ exports.signup = async (req, res) => {
 
     // Verificar si se encontró un usuario en la base de datos
     if (!user) {
-      apiStructure.setStatus("Error", 400, "no existe el usuario2132");
-      console.log(apiStructure.setResult.code)
+      apiStructure.setStatus("Error", 400, "no existe el usuario");
       return res.json(apiStructure.toResponse());
       
     } else {
@@ -27,23 +26,18 @@ exports.signup = async (req, res) => {
 
       // Generar un token de sesión
       const tokenSession = await tokenSign(user);
-
-      console.log(tokenSession);
-
-      // Si la contraseña es correcta, enviar la respuesta JSON con el usuario y el token
+   // Si la contraseña es correcta, enviar la respuesta JSON con el usuario y el token
       if (checkPassword) {
         return res.send({
           user: user,
           tokenSession,
         });
       }
-
       // Si la contraseña no es correcta, establecer el estado como error de credenciales
       if (!checkPassword) {
         apiStructure.setStatus(409, "error", "credenciales inválidas");
       }
     }
-
     // Enviar la respuesta JSON generada por apiStructure
     res.json(apiStructure.toResponse());
   } catch (err) {

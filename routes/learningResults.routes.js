@@ -4,7 +4,7 @@ const LearningResultsController=require('../controllers/LearningResultsControlle
 
 //* Resultados de Aprendizaje
 
-router.get('/learningResults/:competence_id',LearningResultsController.ListLearningResults)
+router.get('/learningResults/:competence_id',LearningResultsController.listLearningResults)
 router.post('/learningResults',LearningResultsController.CreateResults)
 router.put('/learningResults/:code',LearningResultsController.UpdateResults);
 router.delete('/learningResults/:code', LearningResultsController.deleteResults)

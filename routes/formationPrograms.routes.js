@@ -11,6 +11,6 @@ router.put('/formation_programs/:id_formation_programs', validateExistenceMiddle
 router.delete('/formation_programs/:id_formation_programs', FormationPrograms.deleteFormationPrograms)
 
 router.get('/formation_programs/:user_id', FormationPrograms.allFormationProgramIdUser)
-router.get('/formation_programs/show/:id_formation_programs', FormationPrograms.formation_programsbyid)
+router.get('/formation_programs/show/:id_formation_programs', FormationPrograms.formationProgramsById )
 
 module.exports = router;

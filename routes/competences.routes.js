@@ -5,7 +5,6 @@ const {validateCodeUniqueness, validateCompetence } = require('../middleware/com
 const {  validateExistenceMiddleware } = require('../middleware/competence/update.middleware.js')
 //* Competencias
 router.get('/competences', CompetenceController.allCompentences)
-router.get('/competences/:id_competence', CompetenceController.allCompentence)
 router.post('/competences',validateCodeUniqueness, validateCompetence , CompetenceController.createCompetences)
 router.put('/competences/:id_competence',validateExistenceMiddleware, CompetenceController.updateCompetences)
 router.delete('/competences/:id_competence', CompetenceController.deleteCompetence)

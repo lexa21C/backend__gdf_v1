@@ -3,43 +3,52 @@ const Learning_results = require("../models/Learning_results.js")
 const ApiStructure = require('../helpers/responseApi.js')
 const Competences = require('../models/Competence.js')
 
+
 // Controlador para listar todos los resultados de aprendizaje asociados a una competencia por su ID
-exports.ListLearningResults = async (req, res) => {
-    let apiStructure = new ApiStructure()
+exports.listLearningResults = async (req, res) => {
+    const apiStructure = new ApiStructure();
 
-    let { competence_id } = req.params
+    try {
+        const { competence_id } = req.params;
 
-    // Buscar resultados de aprendizaje relacionados con la competencia especificada
-    const results = await Learning_results.find({ competence: competence_id })
+        // Buscar resultados de aprendizaje relacionados con la competencia especificada
+        const results = await Learning_results.find({ competence: competence_id });
 
-    if (results.length > 0) {
-        apiStructure.setResult(results)
-    } else {
-        apiStructure.setStatus(404, 'No hay resultados de aprendizaje')
+        if (results.length > 0) {
+            apiStructure.setResult(results, "Resultados de aprendizaje obtenidos correctamente");
+        } else {
+            apiStructure.setStatus(404, 'Info', 'No hay resultados de aprendizaje asociados a la competencia especificada');
+        }
+    } catch (error) {
+        
+        apiStructure.setStatus(500, 'Error', 'Ocurrió un error  al procesar la solicitud.');
     }
 
-    res.json(apiStructure.toResponse())
-}
+    return res.json(apiStructure.toResponse());
+};
 
 // Controlador para listar un resultado de aprendizaje por su ID
 exports.resultById = async (req, res) => {
-    let apiStructure = new ApiStructure()
-    let { id_Result } = req.params;
+    const apiStructure = new ApiStructure();
+    try {
+        const { id_Result } = req.params;
 
-    // Buscar un resultado de aprendizaje por su ID
-    const result = await Learning_results.findById({ _id: id_Result });
+        // Buscar un resultado de aprendizaje por su ID
+        const result = await Learning_results.findById(id_Result);
 
-    if(result) {
-        apiStructure.setResult(result);
-    }else {
-        apiStructure.setStatus(
-            404,
-            "No existe el Resultado de Aprendizaje"
-        )
+        if (result) {
+            apiStructure.setResult(result);
+        } else {
+            apiStructure.setStatus(404, "Info", "No existe el Resultado de Aprendizaje con el ID proporcionado");
+        }
+    } catch (error) {
+        
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud.");
     }
 
     res.json(apiStructure.toResponse());
-}
+};
+
 
 // Controlador para crear un nuevo resultado de aprendizaje
 exports.CreateResults = async (req, res) => {

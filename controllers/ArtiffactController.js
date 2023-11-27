@@ -64,7 +64,7 @@ exports.artiffactById = async (req, res) => {
     const { id_artiffact } = req.params;
 
     try {
-        const artiffact = await Artifacts.findById(id_artiffact).populate('competence').populate('quarter');
+        const artiffact = await Artiffacts.findById(id_artiffact).populate('competence').populate('quarter');
 
         if (artiffact) {
             apiStructure.setResult(artiffact, "Artefacto obtenido correctamente");
@@ -73,7 +73,8 @@ exports.artiffactById = async (req, res) => {
         }
     } catch (error) {
         console.error("Error al obtener el Artefacto por ID:", error);
-        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al obtener el Artefacto por ID.");
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
+
     }
 
     res.json(apiStructure.toResponse());
@@ -85,18 +86,18 @@ exports.createArtiffacts = async (req, res) => {
 
     try {
         // Eliminar el campo 'project' si está presente y es un arreglo vacío
-        if ('project' in body && body.project.length === 0) {
+        if ('project' in body && Array.isArray(body.project) && body.project.length === 0) {
             delete body.project;
         }
 
-        // Convertir el nombre a minúsculas y capitalizar la primera letra
+        // Formatear el nombre: convertir a minúsculas y capitalizar la primera letra
         const formattedName = body.name.charAt(0).toUpperCase() + body.name.slice(1).toLowerCase();
 
         // Verificar si el nombre ya existe en la base de datos
         const existingArtifact = await Artiffacts.findOne({ name: formattedName });
 
         if (existingArtifact) {
-            apiStructure.setStatus("Failed", 400, `El nombre del Artefacto '${formattedName}' ya existe`);
+            apiStructure.setStatus(409, "Conflict", `Ya existe un Artefacto con el nombre '${formattedName}'`);
         } else {
             // Actualizar el nombre formateado en el objeto antes de crearlo
             body.name = formattedName;
@@ -107,12 +108,14 @@ exports.createArtiffacts = async (req, res) => {
             apiStructure.setResult(createdArtifact, "Artefacto creado exitosamente");
         }
     } catch (error) {
-        console.error("Error al crear el Artefacto:", error);
-        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al crear el Artefacto.");
+        console.error("Error en createArtifacts:", error);
+        apiStructure.setStatus(500, "Error ", "Se ha producido un error al intentar crear el Artefacto. Por favor, inténtelo nuevamente más tarde.");
     }
 
     res.json(apiStructure.toResponse());
 };
+
+
 exports.updateArtiffacts = async (req, res) => {
     const { name, description } = req.body;
     const { idArtiffacts } = req.params;
@@ -129,12 +132,11 @@ exports.updateArtiffacts = async (req, res) => {
             apiStructure.setStatus(404, "Info", "No se encontró el Artefacto para actualizar");
         }
     } catch (error) {
-        console.error("Error al actualizar el Artefacto:", error);
-        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al actualizar el Artefacto.");
+        apiStructure.setStatus(500, "Error", "Se ha producido un error al intentar actualizar el Artefacto. Por favor, inténtelo de nuevo más tarde.");
     }
-
     res.json(apiStructure.toResponse());
 };
+
 exports.deleteArtifact = async (req, res) => {
     const { idArtiffacts } = req.params;
 
@@ -160,10 +162,12 @@ exports.deleteArtifact = async (req, res) => {
         return res.status(500).json({
             status: "Failed",
             statusCode: 500,
-            message: "Ocurrió un error interno al eliminar el artefacto.",
+            message: "Se ha producido un error interno al eliminar el artefacto. Por favor, inténtelo de nuevo más tarde.",
         });
     }
+    
 };
+
 exports.artiffactsByQuarter = async (req, res) => {
     let apiStructure = new ApiStructure()
     try {
@@ -173,9 +177,9 @@ exports.artiffactsByQuarter = async (req, res) => {
         if (!artiffacts) {
             apiStructure.setStatus(
                 "info",
-                202,
-                "no artiffact in List",
-            )
+                204,
+                "No se encontraron artefactos en la lista."
+            );
             return res.json(apiStructure.toResponse())
         }
         // const competence = QuarteByCompetence.map((item) => {
@@ -190,44 +194,7 @@ exports.artiffactsByQuarter = async (req, res) => {
 
     } catch {
         (error) => {
-            console.error("Error in artiffactsByQuarter:", error);
-            apiStructure.setStatus(500, "error", "Error get in server");
-            return res.json(apiStructure.toResponse());
-        }
-    }
-} 
-
-exports.artiffactsByQuarter = async (req, res) => {
-    let apiStructure = new ApiStructure()
-    try {
-        const { quarterId } = req.params
-        console.log(quarterId)
-        const artiffacts = await Artiffacts.find({ quarter: quarterId }).lean()
-        console.log(artiffacts)
-        const QuarteByCompetence = await Quarters.findById(quarterId).lean().populate('competence')
-        if (!artiffacts) {
-
-            apiStructure.setStatus(
-                "info",
-                202,
-                "no artiffact in List",
-            )
-            return res.json(apiStructure.toResponse())
-        }
-        // const competence = QuarteByCompetence.map((item) => {
-        //     return item.competence
-        // })
-        const object = {
-            artiffacts: artiffacts,
-            competence: QuarteByCompetence.competence
-        }
-        apiStructure.setResult(object)
-        return res.json(apiStructure.toResponse())
-
-    } catch {
-        (error) => {
-            console.error("Error in artiffactsByQuarter:", error);
-            apiStructure.setStatus(500, "error", "Error get in server");
+            apiStructure.setStatus(500, "Error", "Se produjo un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
             return res.json(apiStructure.toResponse());
         }
     }
