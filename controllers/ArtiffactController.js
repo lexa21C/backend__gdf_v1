@@ -115,11 +115,11 @@ exports.createArtiffacts = async (req, res) => {
 };
 exports.updateArtiffacts = async (req, res) => {
     const { name, description } = req.body;
-    const { idArtifacts } = req.params;
+    const { idArtiffacts } = req.params;
     const apiStructure = new ApiStructure();
 
     try {
-        const updatedArtifact = await Artiffacts.findByIdAndUpdate(idArtifacts, {
+        const updatedArtifact = await Artiffacts.findByIdAndUpdate(idArtiffacts, {
             name, description
         }, { new: true });
 
@@ -136,16 +136,16 @@ exports.updateArtiffacts = async (req, res) => {
     res.json(apiStructure.toResponse());
 };
 exports.deleteArtifact = async (req, res) => {
-    const { idArtifacts } = req.params;
+    const { idArtiffacts } = req.params;
 
     try {
-        const deletedArtifact = await Artifacts.findByIdAndDelete(idArtifacts);
+        const deletedArtifact = await Artiffacts.findByIdAndDelete(idArtiffacts);
 
         if (!deletedArtifact) {
             return res.status(404).json({
                 status: "Failed",
                 statusCode: 404,
-                message: `No se encontró un artefacto con el ID ${idArtifacts}.`,
+                message: `No se encontró un artefacto con el ID ${idArtiffacts}.`,
             });
         }
 

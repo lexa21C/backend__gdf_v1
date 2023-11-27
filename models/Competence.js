@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 
 var Competence = Schema(
   {
+    _id : String,
     labor_competition: String,
     labor_competence_code: Number,
     competition_name: String,
