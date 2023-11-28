@@ -10,21 +10,13 @@ exports.allQuarters = async (req, res) => {
     try {
         const formationProgram = await Formation_programs.findById(formation_program_id);
         if (!formationProgram) {
-            apiStructure.setStatus(
-                404,
-                "info",
-                "No Formation program");
+            apiStructure.setStatus(404, "info", "No se encontró el programa de formación");
             return res.json(apiStructure.toResponse());
         }
 
         const quarters = await Quarter.find({ formation_program: formation_program_id }).lean().populate('competence');
-        // const competencesQuarters = quarters.map((e) => { return e.competence }).flat()
-        // const numberQuarter = Math.ceil(formationProgram.total_duration / 3);
-        // const quarterProgram = Array.from({ length: numberQuarter }, (_, i) => i + 1);
-
         const competences = await Competence.find({
             program: formation_program_id,
-            // _id: { $nin: competencesQuarters }
         }).lean();
 
         const formArtifacts = [{
@@ -35,79 +27,83 @@ exports.allQuarters = async (req, res) => {
 
         return res.json(apiStructure.toResponse());
     } catch (error) {
-        console.error(
-            "Error in allQuarters:",
-            error);
-        apiStructure.setStatus(
-            500,
-            "error",
-            "Error serve"
-        );
-        return res.json(apiStructure.toResponse());
+        console.error("Error en allQuarters:", error);
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
     }
+    return res.json(apiStructure.toResponse());
 };
 
 exports.createQuarter = async (req, res) => {
-    let {number, competence, formation_program} = req.body;
+    const { number, competence, formation_program } = req.body;
     const apiStructure = new ApiStructure();
 
-    // Comprobar si el número ya existe en la base de datos
-    const existingQuarter = await Quarter.findOne({ number: number });
+    try {
+        // Comprobar si el número ya existe en la base de datos
+        const existingQuarter = await Quarter.findOne({ number: number });
 
-    if (existingQuarter) {
-    // Devuelve una respuesta de error si el número no es único
-    apiStructure.setStatus("Failed", 400, `El numero del trimestre '${number}' Ya Existe`);
+        if (existingQuarter) {
+            // Devuelve una respuesta de error si el número no es único
+            apiStructure.setStatus("Failed", 400, `El número del trimestre '${number}' ya existe`);
+        } else {
+            // Crea el Trimestre si el número es único
+            const newQuarter = await Quarter.create({
+                number,
+                competence,
+                formation_program
+            });
 
-    } else {
-    // Crea el Trimestre si el numero es único
-    await Quarter.create({
-    number,
-     competence,
-      formation_program
-    }).then((success) => {
-        apiStructure.setResult(success, 'Trimestre creado con exito')
-     }).catch((err) => {
-        apiStructure.setStatus(
-            "Failed",
-            400,
-            err.message,
-          )
-     });
+            apiStructure.setResult(newQuarter, 'Trimestre creado con éxito');
+        }
+    } catch (error) {
+        console.error("Error en createQuarter:", error);
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
     }
-    res.json(apiStructure.toResponse())
+
+    res.json(apiStructure.toResponse());
 };
 
 
-exports.updataQuarter = async (req, res) => {
+exports.updateQuarter = async (req, res) => {
     const apiStructure = new ApiStructure();
+
     try {
-        let { body } = req;
-        console.log(body)
-        let { quarteId } = req.params
-        await Quarter.findByIdAndUpdate(quarteId, body)
-        apiStructure.setResult(body);
-        return res.json(apiStructure.toResponse());                                           
-    } catch {
-        console.error("Error in UpdateQuarter:", error);
-        apiStructure.setStatus(500, "error", "Error update in server");
+        const { body } = req;
+        const { quarterId } = req.params;
+
+        const updatedQuarter = await Quarter.findByIdAndUpdate(quarterId, body, { new: true });
+
+        if (updatedQuarter) {
+            apiStructure.setResult(updatedQuarter, 'Trimestre actualizado con éxito');
+        } else {
+            apiStructure.setStatus(404, 'Info', 'No existe el trimestre');
+        }
+
+        return res.json(apiStructure.toResponse());
+    } catch (error) {
+        console.error("Error in updateQuarter:", error);
+        apiStructure.setStatus(500, 'Error', 'Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.');
         return res.json(apiStructure.toResponse());
     }
-}
+};
+
 
 exports.deleteQuarter = async (req, res) => {
     const apiStructure = new ApiStructure();
+
     try {
-        let { quarteId } = req.params
-        await Quarter.findByIdAndDelete(quarteId)
-        apiStructure.setStatus(
-            200,
-            "succes",
-            "Artefacto eliminado Correctamente"
-        );
+        const { quarterId } = req.params;
+        const deletedQuarter = await Quarter.findByIdAndDelete(quarterId);
+
+        if (deletedQuarter) {
+            apiStructure.setResult('Trimestre eliminado correctamente');
+        } else {
+            apiStructure.setStatus(404, 'Info', 'No existe el trimestre');
+        }
+
         return res.json(apiStructure.toResponse());
-    } catch {
-        console.error("Error in DeleteQuarter:", error);
-        apiStructure.setStatus(500, "error", "Error delete in server");
+    } catch (error) {
+        console.error("Error in deleteQuarter:", error);
+        apiStructure.setStatus(500, 'Error', 'Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.');
         return res.json(apiStructure.toResponse());
     }
-}
+};

@@ -6,277 +6,294 @@ var Record = require("../models/Records.js");
 const { body, validationResult } = require('express-validator');
 
 exports.allProjects = async (req, res) => {
-    let apiEstructure = new estructureApi();
+    const apiStructure = new estructureApi();
 
     try {
-        const results = await Project.find().populate('category');;
-        console.log(results[3].category)
-    
+        const projects = await Project.find().populate('category');
 
-        if (results.length > 0) {
-            apiEstructure.setResult(results);
+        if (projects.length > 0) {
+            apiStructure.setResult(projects);
         } else {
-            apiEstructure.setStatus(404, "No existe el proyecto");
+            apiStructure.setStatus(404, "Info", "No existen proyectos");
         }
     } catch (error) {
-        console.log(error);
-        apiEstructure.setStatus(500, "Error en el servidor");
+        console.error("Error al obtener proyectos:", error);
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
     }
 
-    res.json(apiEstructure.toResponse());
-}
-
+    return res.json(apiStructure.toResponse());
+};
 
 exports.allProjectsByRecords = async (req, res) => {
-    let apiEstructure = new estructureApi();
+    const apiStructure = new estructureApi();
 
-    let {record_id} = req.params;  
-    const results = await Project.find({ record: record_id })
-    .populate({
-        path: 'record',
-        populate: {
-            path: 'user',
-            model: 'Users',
-            populate:{
-                path: 'formation_program',
-                model: 'Formation_programs',
+    try {
+        const { record_id } = req.params;
+
+        const projects = await Project.find({ record: record_id })
+            .populate({
+                path: 'record',
                 populate: {
-                    path: 'competence',
-                    model: 'Competences',
-                    select: '_id labor_competence_code labor_competition labor_competition_version'
-            }
-            }
-        }
-    })
-    .populate('category');
+                    path: 'user',
+                    model: 'Users',
+                    populate: {
+                        path: 'formation_program',
+                        model: 'Formation_programs',
+                        populate: {
+                            path: 'competence',
+                            model: 'Competences',
+                            select: '_id labor_competence_code labor_competition labor_competition_version'
+                        }
+                    }
+                }
+            })
+            .populate('category');
 
-    if (results.length > 0) {
-        apiEstructure.setResult(results);
-    } else {
-        apiEstructure.setStatus(404, "No existe el Proyecto Formativo")
+        if (projects.length > 0) {
+            apiStructure.setResult(projects);
+        } else {
+            apiStructure.setStatus(404, "Info", "No existen proyectos formativos para el registro especificado");
+        }
+    } catch (error) {
+        console.error("Error al obtener proyectos formativos por registro:", error);
+        apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
     }
-    res.json(apiEstructure.toResponse());
-    
+
+    return res.json(apiStructure.toResponse());
 };
 
 
-//Crear Proyecto
+// Crear Proyecto
 exports.createProject = async (req, res) => {
-    let apiEstructure = new estructureApi();
-    let { name, state, problem_statement, project_justification, general_objective,
+    const apiStructure = new estructureApi();
+    const {
+        name, state, problem_statement, project_justification, general_objective,
         specific_objectives, scope_feasibility, project_summary, technological_research,
-        glossary, date_presentation, approval_date, category, record } = req.body;
-    
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        apiEstructure.setStatus(
-            "Failed",
-            400,
-            errors.array()
-        );
-        res.status(400).json(apiEstructure.toResponse());
-    }
+        glossary, date_presentation, approval_date, category, record
+    } = req.body;
 
     try {
+        // Validar datos con express-validator
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            apiStructure.setStatus("Failed", 400, errors.array());
+            return res.status(400).json(apiStructure.toResponse());
+        }
+
         // Verificar si el nombre ya existe en la base de datos
         const existingProject = await Project.findOne({ name });
 
         if (existingProject) {
-            apiEstructure.setStatus("Failed", 400, `El nombre del proyecto '${name}' Ya Existe`);
+            apiStructure.setStatus("Failed", 400, `El nombre del proyecto '${name}' ya existe`);
         } else {
-            let arrayC = [];
+            // Obtener IDs de las categorías
+            let categoryIds = [];
             const arrayCategories = Array.isArray(category);
             if (arrayCategories) {
                 for (let i = 0; i < category.length; i++) {
-                    const foundcategory = await Category.findOne({ name: category[i] });
-                    arrayC.push(foundcategory._id);
+                    const foundCategory = await Category.findOne({ name: category[i] });
+                    if (foundCategory) {
+                        categoryIds.push(foundCategory._id);
+                    }
                 }
-                category = arrayC;
             } else {
-                const f = await Category.findOne({ name: category });
-                category = f;
+                const foundCategory = await Category.findOne({ name: category });
+                if (foundCategory) {
+                    categoryIds.push(foundCategory._id);
+                }
             }
 
-            const r = await Record.findOne({ number_record: record });
-            record = r;
-                     
+            // Verificar si la categoría existe
+            if (categoryIds.length === 0) {
+                apiStructure.setStatus("Failed", 400, "Categoría no encontrada");
+                return res.status(400).json(apiStructure.toResponse());
+            }
+
+            // Obtener el registro asociado
+            const foundRecord = await Record.findOne({ number_record: record });
+
+            // Verificar si el registro existe
+            if (!foundRecord) {
+                apiStructure.setStatus("Failed", 400, "Registro no encontrado");
+                return res.status(400).json(apiStructure.toResponse());
+            }
+
             // Crear el nuevo proyecto con los datos proporcionados
             const newProject = await Project.create({
                 name, state, problem_statement, project_justification, general_objective,
                 specific_objectives, scope_feasibility, project_summary, technological_research,
-                glossary, date_presentation, approval_date, category, record
+                glossary, date_presentation, approval_date, category: categoryIds, record: foundRecord._id
             });
 
-            apiEstructure.setResult(newProject, "Proyecto creado Exitosamente");
+            apiStructure.setResult(newProject, "Proyecto creado exitosamente");
         }
     } catch (err) {
-        apiEstructure.setStatus("Failed", 500, err.message);
+        console.error("Error al crear el proyecto:", err);
+        apiStructure.setStatus("Failed", 500, "Se ha producido un error al intentar crear el proyecto");
     }
-    res.json(apiEstructure.toResponse());
+
+    return res.json(apiStructure.toResponse());
 };
 
 
 exports.projectById = async (req, res) => {
-    let apiEstructure = new estructureApi();
-    let id_project = req.params.id_project;
+    const apiEstructure = new estructureApi();
+    const id_project = req.params.id_project;
 
-    const project = await Project.findById({ _id: id_project }).populate("category");
+    try {
+        const project = await Project.findById(id_project).populate("category");
 
-    if (project) {
-        apiEstructure.setResult(project);
-    } else {
-        apiEstructure.setStatus(404, "No existe el Proyecto Formativo")
+        if (project) {
+            apiEstructure.setResult(project);
+        } else {
+            apiEstructure.setStatus(404, "No se encontró el Proyecto Formativo");
+        }
+    } catch (error) {
+        console.error("Error al obtener el proyecto por ID:", error);
+        apiEstructure.setStatus(500, "Error ", "Ocurrió un error interno al obtener el proyecto.");
     }
-    res.json(apiEstructure.toResponse());
-}
 
+    res.json(apiEstructure.toResponse());
+};
 exports.updateProjects = async (req, res) => {
     let apiEstructure = new estructureApi();
     let id_project = req.params.id_project;
     let reqproject = req.body;
 
-    const project = await Project.findById({ _id: id_project });
+    try {
+        const project = await Project.findById(id_project);
 
-    if (project) {
-        apiEstructure.setResult("Proyecto Actualizado! Exitosamente ")
-    } else {
-        apiEstructure.setStatus(404, "Info", "No existe el Proyecto")
-    }
-    let arrayC = []
-    const arrayCategories=Array.isArray(reqproject.category)
-
-    if(arrayCategories ){
-        if(reqproject.category[0].name !=null ){
-            for (let i = 0; i < reqproject.category.length; i++) {
-                const foundcategory = await Category.findOne({ name: reqproject.category[i].name });
-                arrayC.push(foundcategory._id)
-            }
-        }else{
-            for (let i = 0; i < reqproject.category.length; i++) {
-                const foundcategory = await Category.findOne({ name: reqproject.category[i] });
-                arrayC.push(foundcategory._id)
-            }
+        if (!project) {
+            apiEstructure.setStatus(404, "Info", "No se encontró el Proyecto");
+            return res.json(apiEstructure.toResponse());
         }
 
-        reqproject.category = arrayC
-    }else{
-         const f = await Category.findOne({ name: reqproject.category });
-         reqproject.category= f._id
+        let arrayCategories = [];
+
+        if (Array.isArray(reqproject.category)) {
+            for (let i = 0; i < reqproject.category.length; i++) {
+                const categoryName = reqproject.category[i].name || reqproject.category[i];
+                const foundcategory = await Category.findOne({ name: categoryName });
+                if (foundcategory) {
+                    arrayCategories.push(foundcategory._id);
+                }
+            }
+            reqproject.category = arrayCategories;
+        } else {
+            const foundcategory = await Category.findOne({ name: reqproject.category });
+            reqproject.category = foundcategory ? foundcategory._id : null;
+        }
+
+        const updatedProject = await Project.findByIdAndUpdate(id_project, reqproject, { new: true });
+
+        if (updatedProject) {
+            apiEstructure.setResult(updatedProject, "Proyecto actualizado exitosamente");
+        } else {
+            apiEstructure.setStatus(404, "Info", "No se encontró el Proyecto después de la actualización");
+        }
+    } catch (error) {
+        console.error("Error al actualizar el proyecto:", error);
+        apiEstructure.setStatus(500, "Error interno", "Ocurrió un error interno al actualizar el proyecto.");
     }
 
-    await Project.findByIdAndUpdate(id_project, {
-        name: reqproject.name,
-        state: reqproject.state,
-        problem_statement: reqproject.problem_statement,
-        project_justification: reqproject.project_justification,
-        general_objective: reqproject.general_objective,
-        specific_objectives: reqproject.specific_objectives,
-        scope_feasibility: reqproject.scope_feasibility,
-        project_summary: reqproject.project_summary,
-        technological_research: reqproject.technological_research,
-        glossary: reqproject.glossary,
-        date_presentation: reqproject.date_presentation,
-        approval_date: reqproject.approval_date,
-        category: reqproject.category
-    }).then(async (success) => {
-        apiEstructure.setResult(success, "Proyecto Actualizado! Exitosamente ")
-    }).catch((err) => {
-        apiStructure.setStatus(
-            "Falied",
-            400,
-            err._message,
-        )
-    });
-
     res.json(apiEstructure.toResponse());
-}
+};
 
 exports.deleteProject = async (req, res) => {
-    let apiEstructure = new estructureApi();
-    let id_project = req.params.id_project;
-  
-    const project = await Project.findById({ _id: id_project });
-    if (project) {
-        apiEstructure.setResult("Proyecto Eliminado")
-    } else {
-        apiEstructure.setStatus(404, "Info", "No existe el proyecto")
+    try {
+        const apiEstructure = new estructureApi();
+        const id_project = req.params.id_project;
+
+        const project = await Project.findById({ _id: id_project });
+
+        if (!project) {
+            apiEstructure.setStatus(404, "Info", "No existe el proyecto");
+            return res.json(apiEstructure.toResponse());
+        }
+
+        await Project.findByIdAndDelete({ _id: id_project });
+        apiEstructure.setResult("Proyecto Eliminado");
+        res.json(apiEstructure.toResponse());
+    } catch (error) {
+        console.error("Error al intentar eliminar el proyecto:", error);
+        const apiEstructure = new estructureApi();
+        apiEstructure.setStatus(500, "Error ", "Ocurrió un error  al intentar eliminar el proyecto.");
+        res.json(apiEstructure.toResponse());
     }
-    await Project.findByIdAndDelete({ _id: id_project });
-    res.json(apiEstructure.toResponse());
-}
+};
 
 exports.searchProject = async (req, res) => {
-    let apiEstructure = new estructureApi();
-    const { name, categories } = req.body;
+    try {
+        const apiEstructure = new estructureApi();
+        const { name, categories } = req.body;
 
-    const category_name = await Category.find({ name: categories })
+        let query = { name: { $regex: new RegExp(name, 'i') } };
+        
+        if (categories && categories.length > 0) {
+            const categoryIds = await Category.find({ name: { $in: categories } }).distinct('_id');
+            query.category = { $in: categoryIds };
+        }
 
-    const id = []
-    if (categories.length > 0) {
-        Project.find(
-            { name: { $regex: new RegExp(name, 'i') } }
-        )
-            .populate('category').then((project) => {
-                project.forEach((data) => {
-                    id.push(data.id)
-                })
-                SearchCategory(res, id, category_name)    
-            })
-            .catch((error) => {
-                apiEstructure.setStatus(404,"No existe el proyecto", error);
-            });
-    } else {
-        Project.find(
-            { name: { $regex: new RegExp(name, 'i') } }
-        )
-            .populate('category').then((project) => {
-                //res.json(project)
-                apiEstructure.setResult(project);
-            })
-            .catch((error) => {
-               apiEstructure.setStatus(404, "Info", "No existe el proyecto", error);
-            });
-            res.json(apiEstructure.toResponse());
+        const projects = await Project.find(query).populate('category');
 
+        if (projects.length > 0) {
+            apiEstructure.setResult(projects);
+        } else {
+            apiEstructure.setStatus(404, "Info", "No se encontraron proyectos");
+        }
+
+        res.json(apiEstructure.toResponse());
+    } catch (error) {
+        console.error("Error al buscar proyectos:", error);
+        const apiEstructure = new estructureApi();
+        apiEstructure.setStatus(500, "Error interno", "Ocurrió un error interno al buscar proyectos.");
     }
-    
-}
+    return res.json(apiEstructure.toResponse());
+};
 
-const SearchCategory = async (res, idProject, a) => {
-    let apiEstructure = new estructureApi();
-    var o = []
-    for (let i = 0; i < idProject.length; i++) {
-        o.push(
-            await Project.find({ _id: idProject, category: a[i] }).populate('category')
-        )
-        apiEstructure.setResult(o, "Busqueda exitosa");
+
+const searchCategory = async (res, projectIds, categories) => {
+    try {
+        const apiEstructure = new estructureApi();
+        const result = [];
+
+        for (let i = 0; i < projectIds.length; i++) {
+            const projects = await Project.find({ _id: projectIds[i], category: categories[i] }).populate('category');
+            result.push(projects);
+        }
+
+        apiEstructure.setResult(result, "Búsqueda exitosa");
+        res.json(apiEstructure.toResponse());
+    } catch (error) {
+        console.error("Error al realizar la búsqueda por categoría:", error);
+        const apiEstructure = new estructureApi();
+        apiEstructure.setStatus(500, "Error ", "Ocurrió un error al buscar proyectos por categoría.");
+        res.json(apiEstructure.toResponse());
     }
-    //res.json({ o })
-    res.json(apiEstructure.toResponse());
-}
+};
+
+
 
 
 // Controlador para buscar fichas y proyectos por el ID del programa
 exports.getFichasAndProjectsByProgram = async (req, res) => {
-  const programId = req.params.formationPrograms_Id;
-  console.log(programId)
-
-  try {
-    // Busca todas las fichas que tienen el mismo programa
-    const fichas = await Record.find({ formation_program: programId });
-
-    // Recopila los IDs de las fichas encontradas
-    const fichaIds = fichas.map(ficha => ficha._id);
-
-    // Luego, busca todos los proyectos que están asociados a las fichas encontradas
-    const results = await Project.find({ record: { $in: fichaIds } }).populate('category');
-
-    // Devuelve las fichas y proyectos encontrados
-    return res.json({  results });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error en la consulta.' });
-  }
-};
-
-
+    const programId = req.params.formationPrograms_Id;
+  
+    try {
+      // Buscar todas las fichas que tienen el mismo programa
+      const fichas = await Record.find({ formation_program: programId });
+  
+      // Recopilar los IDs de las fichas encontradas
+      const fichaIds = fichas.map(ficha => ficha._id);
+  
+      // Buscar todos los proyectos asociados a las fichas encontradas
+      const projects = await Project.find({ record: { $in: fichaIds } }).populate('category');
+  
+      // Devolver las fichas y proyectos encontrados
+      return res.json({ fichas, projects });
+    } catch (error) {
+      console.error("Error al buscar fichas y proyectos por programa:", error);
+      return res.status(500).json({ error: 'Error en la consulta.' });
+    }
+  };
+  

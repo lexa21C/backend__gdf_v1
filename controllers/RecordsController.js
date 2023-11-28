@@ -3,22 +3,22 @@ const ApiStructure = require('../helpers/responseApi.js');
 const Records = require('../models/Records.js');
 
 exports.all = async (req, res) => {
-    let apiStructure = new ApiStructure();
+    const apiStructure = new ApiStructure();
 
     try {
-        const results = await Records.find({});
+        const records = await Records.find({});
 
-        if (results.length > 0) {
-            apiStructure.setResult(results);
+        if (records.length > 0) {
+            apiStructure.setResult(records);
         } else {
-            apiStructure.setStatus(404, "No existe la ficha");
+            apiStructure.setStatus(404, 'Info', 'No hay fichas disponibles');
         }
     } catch (error) {
-        console.log(error);
-        apiStructure.setStatus(500, "Error en el servidor");
+        console.error('Error in all:', error);
+        apiStructure.setStatus(500, 'Error', 'Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.');
     }
 
-    res.json(apiStructure.toResponse());
+    return res.json(apiStructure.toResponse());
 };
 
 
@@ -28,7 +28,7 @@ exports.allRecords = async (req, res) => {
     try {
         const { formationPrograms_Id } = req.params;
 
-        const results = await Records.find({ formation_program: formationPrograms_Id })
+        const records = await Records.find({ formation_program: formationPrograms_Id })
             .populate('formation_program')
             .populate({
                 path: 'user',
@@ -37,19 +37,18 @@ exports.allRecords = async (req, res) => {
                 }
             });
 
-        if (results.length > 0) {
-            apiStructure.setResult(results, "Registros obtenidos correctamente");
+        if (records.length > 0) {
+            apiStructure.setResult(records, "Registros obtenidos correctamente");
         } else {
-            apiStructure.setStatus(404, 'Info', 'No hay registros disponibles');
+            apiStructure.setStatus(404, 'Info', 'No hay registros disponibles para el programa de formación especificado');
         }
     } catch (error) {
         console.error("Error al obtener registros:", error);
         apiStructure.setStatus(500, 'Error interno', 'Ocurrió un error interno al obtener registros.');
     }
 
-    res.json(apiStructure.toResponse());
+    return res.json(apiStructure.toResponse());
 };
-
 
 exports.recordById = async (req, res) => {
     const apiStructure = new ApiStructure();
@@ -61,14 +60,14 @@ exports.recordById = async (req, res) => {
         if (record) {
             apiStructure.setResult(record, "Registro obtenido correctamente");
         } else {
-            apiStructure.setStatus(404, "Info", "No existe el Proyecto Formativo");
+            apiStructure.setStatus(404, "Info", "No se encontró el registro con el ID proporcionado");
         }
     } catch (error) {
         console.error("Error al obtener el registro por ID:", error);
-        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al obtener el Proyecto Formativo por ID.");
+        apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al obtener el registro por ID.");
     }
 
-    res.json(apiStructure.toResponse());
+    return res.json(apiStructure.toResponse());
 };
 
 exports.createRecords = async (req, res) => {
@@ -78,7 +77,7 @@ exports.createRecords = async (req, res) => {
     try {
         const existingRecord = await Records.findOne({ number_record: number_record });
         if (existingRecord) {
-            apiStructure.setStatus("Stop", 400, "Lo sentimos, ya existe una ficha con ese número");
+            apiStructure.setStatus("Failed", 400, `Ya existe una ficha con el número ${number_record}`);
         } else {
             const createdRecord = await Records.create({
                 number_record,
@@ -87,26 +86,28 @@ exports.createRecords = async (req, res) => {
                 formation_program,
                 user,
             });
-            apiStructure.setResult(createdRecord, "Ficha Creada exitosamente");
+            apiStructure.setResult(createdRecord, "Ficha creada exitosamente");
         }
     } catch (err) {
-        apiStructure.setStatus("Failed", 400, err.message);
+        console.error("Error al crear la ficha:", err);
+        apiStructure.setStatus("Failed", 500, "Ocurrió un error interno al crear la ficha.");
     }
 
-    res.json(apiStructure.toResponse());
+    return res.json(apiStructure.toResponse());
 };
-
 exports.updateRecords = async (req, res) => {
     const { number_record, start_date, finish_date, formation_program, user } = req.body;
     const { idRecords } = req.params;
     const apiStructure = new ApiStructure();
 
     try {
-        const updatedRecord = await Records.findByIdAndUpdate(idRecords, {
-            number_record, start_date, finish_date, formation_program, user
-        }, { new: true });
+        const existingRecord = await Records.findById(idRecords);
 
-        if (updatedRecord) {
+        if (existingRecord) {
+            const updatedRecord = await Records.findByIdAndUpdate(idRecords, {
+                number_record, start_date, finish_date, formation_program, user
+            }, { new: true });
+
             apiStructure.setResult(updatedRecord, "Ficha actualizada con éxito");
         } else {
             apiStructure.setStatus(404, "Info", "No se encontró la ficha para actualizar");
@@ -119,15 +120,17 @@ exports.updateRecords = async (req, res) => {
     res.json(apiStructure.toResponse());
 };
 
+
 exports.deleteRecords = async (req, res) => {
     const { idRecords } = req.params;
     const apiStructure = new ApiStructure();
 
     try {
-        const deletedRecord = await Records.findByIdAndDelete(idRecords);
+        const existingRecord = await Records.findById(idRecords);
 
-        if (deletedRecord) {
-            apiStructure.setResult(deletedRecord, "Ficha eliminada exitosamente");
+        if (existingRecord) {
+            const deletedRecord = await Records.findByIdAndDelete(idRecords);
+            apiStructure.setResult( "Ficha eliminada exitosamente");
         } else {
             apiStructure.setStatus(404, "Info", "No se encontró la ficha para eliminar");
         }

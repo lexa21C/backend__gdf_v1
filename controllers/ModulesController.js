@@ -1,61 +1,81 @@
 const Module = require("../models/Modules.js");
 const ApiStructure = require("../helpers/responseApi.js");
 
-exports.allModules = async(req, res) => {
-    let apistructure = new ApiStructure();
+// Controlador para obtener todos los módulos
+exports.allModules = async (req, res) => {
+  const apiStructure = new ApiStructure();
 
-    const module = await  Module.find({})
+  try {
+      const modules = await Module.find({});
 
-    if(module.length >0){
-        apistructure.setResult(module)
-    }else{
-        apistructure.setStatus(404, 'info', 'NO hay modulos')
-    }
-
-    res.json(apistructure.toResponse())
-
-}
-
-exports.createModules = async (req, res) => {
-  let apistructure = new ApiStructure();
-  let { path, name, icon, element, layout, auth, sidebar } = req.body;
-
-  await Module.create({ path, name, icon, element, layout, auth, sidebar })
-    .then((success) => {
-      apistructure.setResult(success);
-    })
-    .catch((error) => {
-      apistructure.setStatus(
-        error.parent || error,
-        "Error al crear el Modulo",
-        error.parent || error
-      );
-    });
-
-  res.json(apistructure.toResponse());
-};
-
-exports.updatesModules = async (req, res) => {
-  let apistructure = new ApiStructure();
-  let id_module = req.params.id_module;
-  let reqModule = req.body;
-
-  const modules = await Module.find({});
-  if (modules.length > 0) {
-    apistructure.setResult("Siiiiuu");
-  } else {
-    apistructure.setResult(404, "Info", "No hay categorias");
+      if (modules.length > 0) {
+          apiStructure.setResult(modules);
+      } else {
+          apiStructure.setStatus(404, 'Info', 'No hay módulos disponibles');
+      }
+  } catch (error) {
+      console.error('Error al obtener todos los módulos:', error);
+      apiStructure.setStatus(500, "Error ", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
+     
   }
 
-  await Module.findByIdAndUpdate(id_module, {
-    path : reqModule.path,
-    name : reqModule.name,
-    icon : reqModule.icon,
-    element : reqModule.element,
-    layout : reqModule.layout,
-    auth : reqModule.auth,
-    sidebar : reqModule.sidebar
-  });
+    return res.json(apiStructure.toResponse());
+};
 
-  res.json(apistructure.toResponse());
+
+// Controlador para crear un nuevo módulo
+exports.createModules = async (req, res) => {
+  const apiStructure = new ApiStructure();
+  const { path, name, icon, element, layout, auth, sidebar } = req.body;
+
+  try {
+    const existingModule = await Module.findOne({ path });
+
+    if (existingModule) {
+      apiStructure.setStatus("Failed", 400, `El módulo con la ruta '${path}' ya existe`);
+    } else {
+      const createdModule = await Module.create({ path, name, icon, element, layout, auth, sidebar });
+      apiStructure.setResult(createdModule, "Módulo creado exitosamente");
+    }
+  } catch (error) {
+    console.error('Error al crear el módulo:', error);
+    apiStructure.setStatus(500, "Error ", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
+  }
+
+  return res.json(apiStructure.toResponse());
+};
+
+
+// Controlador para actualizar un módulo por su ID
+exports.updatesModules = async (req, res) => {
+  const apiStructure = new ApiStructure();
+  const id_module = req.params.id_module;
+  const reqModule = req.body;
+
+  try {
+    const updatedModule = await Module.findByIdAndUpdate(
+      id_module,
+      {
+        path: reqModule.path,
+        name: reqModule.name,
+        icon: reqModule.icon,
+        element: reqModule.element,
+        layout: reqModule.layout,
+        auth: reqModule.auth,
+        sidebar: reqModule.sidebar
+      },
+      { new: true }
+    );
+
+    if (updatedModule) {
+      apiStructure.setResult(updatedModule, "Módulo actualizado correctamente");
+    } else {
+      apiStructure.setStatus(404, "Info", "No se encontró el módulo para actualizar");
+    }
+  } catch (error) {
+    console.error('Error al actualizar el módulo:', error);
+    apiStructure.setStatus(500, 'Error interno', 'Ocurrió un error  al intentar actualizar el módulo.');
+  }
+
+  return res.json(apiStructure.toResponse());
 };

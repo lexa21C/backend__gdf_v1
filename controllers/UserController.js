@@ -6,17 +6,26 @@ const { body, validationResult } = require("express-validator");
 const { encrypt } = require("../helpers/Bycript");
 const { validateProfileExistence } = require('../helpers/user/registar/profileValidation.js'); 
 
-//Listar usuarios
+// Listar usuarios
 exports.allUser = async (req, res) => {
-  let apiStructure = new ApiStructure();
+  const apiStructure = new ApiStructure();
 
-  const users = await User.find({}).select('-password').populate("type_profile").populate('formation_program').populate('training_center');
+  try {
+      const users = await User.find({}).select('-password')
+          .populate("type_profile")
+          .populate('formation_program')
+          .populate('training_center');
 
-  if (users.length > 0) {
-    apiStructure.setResult(users);
-  } else {
-    apiStructure.setStatus(404, "info", "No hay usuarios");
+      if (users.length > 0) {
+          apiStructure.setResult(users);
+      } else {
+          apiStructure.setStatus(404, "Info", "No hay usuarios disponibles");
+      }
+  } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      apiStructure.setStatus(500, "Error interno", "Ocurrió un error interno al obtener usuarios.");
   }
+
   res.json(apiStructure.toResponse());
 };
 
