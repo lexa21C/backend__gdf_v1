@@ -6,7 +6,14 @@ exports.all = async (req, res) => {
     const apiStructure = new ApiStructure();
 
     try {
-        const records = await Records.find({});
+        const records = await Records.find({})
+        .populate('formation_program')
+        .populate({
+            path: 'user',
+            populate: {
+                path: 'training_center',
+            }
+        });
 
         if (records.length > 0) {
             apiStructure.setResult(records);

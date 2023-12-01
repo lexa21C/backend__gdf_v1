@@ -107,6 +107,7 @@ exports.createFormstionPrograms = async (req, res) => {
             program_level,
             thematic_line
         } = req.body;
+        const _id = program_code
 
         // Puedes realizar la validación de la existencia de la competencia y el nivel del programa antes de crearlo
         // const existingCompetence = await Competence.findOne({ labor_competition: competence });
@@ -118,6 +119,7 @@ exports.createFormstionPrograms = async (req, res) => {
         // }
 
         const newFormationProgram = await Formation_programs.create({
+            _id,
             program_name,
             program_code,
             total_duration,
