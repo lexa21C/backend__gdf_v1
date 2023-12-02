@@ -8,8 +8,8 @@ var Formation_program = Schema({
     number_quarters: Number,
     total_duration:String,
     Program_version:String,
-    program_start_date: String,
-    program_end_date: String,
+    program_start_date: Date,
+    program_end_date: Date,
     competence : [{
         ref: "Competences",
         type: mongoose.Schema.Types.Number,
