@@ -2,7 +2,7 @@ const Formation_programs = require("../models/Formation_programs.js")
 const estructuraApi = require('../helpers/responseApi.js');
 const Competence = require('../models/Competence.js')
 const User = require('../models/Users.js')
-var Level=require("../models/Program_levels.js")
+var Programs_level=require("../models/Program_levels.js")
 
 exports.allFormationPrograms = async (req, res) => {
     const apiStructure = new estructuraApi();
@@ -109,15 +109,32 @@ exports.createFormstionPrograms = async (req, res) => {
         } = req.body;
         const _id = program_code
 
-        // Puedes realizar la validación de la existencia de la competencia y el nivel del programa antes de crearlo
-        // const existingCompetence = await Competence.findOne({ labor_competition: competence });
-        // const existingProgramLevel = await ProgramLevel.findOne({ /*... */ });
-
+        //Puedes realizar la validación de la existencia de la competencia y el nivel del programa antes de crearlo
+        // const existingCompetence = await Competence.findOne({ _id: competence });
+        // const existingProgramLevel = await Programs_level.findOne({_id:program_level});
+        
         // if (!existingCompetence || !existingProgramLevel) {
         //     apiStructure.setStatus(400, "Info", "La competencia o el nivel del programa no existen");
         //     return res.json(apiStructure.toResponse());
         // }
+        // Obtiene todas las competencias existentes
+        const allCompetences = await Competence.find({});
+        const validCompetences = allCompetences.map(comp => comp._id);
 
+        // Verifica si todas las competencias proporcionadas son válidas
+        const areAllCompetencesValid = competence.every(comp => validCompetences.includes(comp));
+
+        if (!areAllCompetencesValid) {
+            apiStructure.setStatus(400, "Info", "Al menos una de las competencias proporcionadas no es válida");
+            return res.json(apiStructure.toResponse());
+        }
+
+        const existingProgramLevel = await Programs_level.findOne({ _id: program_level });
+
+        if (!existingProgramLevel) {
+            apiStructure.setStatus(400, "Info", "El nivel del programa no existe");
+            return res.json(apiStructure.toResponse());
+        }
         const newFormationProgram = await Formation_programs.create({
             _id,
             program_name,
