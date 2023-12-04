@@ -7,7 +7,7 @@ var Competence = Schema(
     _id : String,
     labor_competition: String,
     labor_competence_code: Number,
-    competition_name: String,
+    program_competition: String,
     labor_competition_version: String,
     estimated_duration: String,
     quarter: Number,

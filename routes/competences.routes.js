@@ -5,11 +5,11 @@ const {validateCodeUniqueness, validateCompetence } = require('../middleware/com
 const {  validateExistenceMiddleware } = require('../middleware/competence/update.middleware.js')
 //* Competencias
 router.get('/competences', CompetenceController.allCompentences)
-router.post('/competences',validateCodeUniqueness, validateCompetence , CompetenceController.createCompetences)
-router.put('/competences/:id_competence',validateExistenceMiddleware, CompetenceController.updateCompetences)
-router.delete('/competences/:id_competence', CompetenceController.deleteCompetence)
+router.post('/competence' , CompetenceController.createCompetences)
+router.put('/competence/:id_competence', CompetenceController.updateCompetences)
+router.delete('/competence/:id_competence', CompetenceController.deleteCompetence)
 
-router.get('/competences/show/:id_competence', CompetenceController.competenceId)
+router.get('/competence/:id_competence', CompetenceController.competenceId)
 router.get('/competences/:formation_program_id', CompetenceController.compoetenceByFormation)
 
 module.exports = router;

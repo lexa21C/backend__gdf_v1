@@ -51,12 +51,13 @@ exports.createCompetences = async (req, res) => {
     const {
         labor_competition,
         labor_competence_code,
-        competition_name,
+        program_competition,
         labor_competition_version,
         estimated_duration,
-        quarter,
-        program
+        // quarter,
+        // program
     } = req.body;
+    const _id = labor_competence_code
 
     // let arrayF = []
     // for (let i = 0; i < formation_programs.length; i++) {
@@ -71,13 +72,14 @@ exports.createCompetences = async (req, res) => {
 
     try {
         const createdCompetence = await Competence.create({
+            _id,
             labor_competition,
             labor_competence_code,
-            competition_name,
+            program_competition,
             labor_competition_version,
             estimated_duration,
-            quarter,
-            program
+            // quarter,
+            // program
         });
 
         apiStructure.setResult(createdCompetence, "Competencia creada exitosamente");
