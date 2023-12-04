@@ -110,7 +110,8 @@ exports.deleteResults = async (req, res) => {
     const apiStructure = new ApiStructure();
 
     try {
-        const idResult = req.params.code;
+        const idResult = req.params.id;
+        console.log(idResult)
         const deletedResult = await Learning_results.findByIdAndDelete(idResult);
 
         if (deletedResult) {

@@ -19,6 +19,7 @@ exports.allCompentences = async (req, res) => {
             return res.json(apiStructure.toResponse());
         }
     } catch (error) {
+        console.log(error)
         apiStructure.setStatus(500, "Error", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
     }
     return res.json(apiStructure.toResponse());
