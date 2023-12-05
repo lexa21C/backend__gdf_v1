@@ -4,7 +4,7 @@ const Records = require('../models/Records.js');
 
 exports.all = async (req, res) => {
     const apiStructure = new ApiStructure();
-
+    
     try {
         const records = await Records.find({})
         .populate('formation_program')
@@ -31,7 +31,7 @@ exports.all = async (req, res) => {
 
 exports.allRecords = async (req, res) => {
     const apiStructure = new ApiStructure();
-
+    console.log('records')
     try {
         const { formationPrograms_Id } = req.params;
 
@@ -45,7 +45,7 @@ exports.allRecords = async (req, res) => {
             });
 
         if (records.length > 0) {
-            apiStructure.setResult(records, "Registros obtenidos correctamente");
+            apiStructure.setResult(records);
         } else {
             apiStructure.setStatus(404, 'Info', 'No hay registros disponibles para el programa de formación especificado');
         }

@@ -6,7 +6,7 @@ const Competence = require('../models/Competence.js')
 exports.allQuarters = async (req, res) => {
     const apiStructure = new ApiStructure();
     const { formation_program_id } = req.params;
-
+    console.log('quater')
     try {
         const formationProgram = await Formation_programs.findById(formation_program_id);
         if (!formationProgram) {
