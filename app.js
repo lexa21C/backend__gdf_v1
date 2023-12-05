@@ -21,6 +21,7 @@ app.use('/api/v1', require('./routes/formationPrograms.routes.js'));
 app.use('/api/v1', require('./routes/graphsProjectCategory.routes.js'));
 app.use('/api/v1', require('./routes/learningResults.routes.js'));
 app.use('/api/v1', require('./routes/modules.routes.js'));
+app.use('/api/v1', require('./routes/programLevels.routes.js'));
 app.use('/api/v1', require('./routes/profile.routes.js'));
 app.use('/api/v1', require('./routes/projects.routes.js'));
 app.use('/api/v1', require('./routes/quarter.routes.js'));

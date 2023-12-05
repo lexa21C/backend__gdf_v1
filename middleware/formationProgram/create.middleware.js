@@ -43,10 +43,10 @@ const validateFormationProgram = async (req, res, next) => {
         check("program_end_date")
             .trim()
             .notEmpty().withMessage( errorMessages.fieldIsRequired( "Fecha final del programa")),
-        check("competence")
-            .notEmpty().withMessage(errorMessages.fieldIsRequired("competencias" )),
-        check("program_level")
-            .notEmpty().withMessage(errorMessages.fieldIsRequired("Nivel programa")),
+        // check("competence")
+        //     .notEmpty().withMessage(errorMessages.fieldIsRequired("competencias" )),
+        // // check("program_level")
+        //     .notEmpty().withMessage(errorMessages.fieldIsRequired("Nivel programa")),
         check("thematic_line")
             .notEmpty().withMessage(errorMessages.fieldIsRequired("línea temática"))
     ]
@@ -60,7 +60,7 @@ const validateFormationProgram = async (req, res, next) => {
                     400,
                     errorMessages
                 );
-                res.json(apiStructure.toResponse());
+                return res.json(apiStructure.toResponse());
             }
             next();
         })
