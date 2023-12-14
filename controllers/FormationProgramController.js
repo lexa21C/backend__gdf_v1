@@ -1,6 +1,7 @@
 const Formation_programs = require("../models/Formation_programs.js")
-const estructuraApi = require('../helpers/responseApi.js');
+const Formation_program_create = require("../models/create/Formation_programs.js")
 const Competence = require('../models/Competence.js')
+const estructuraApi = require('../helpers/responseApi.js');
 const User = require('../models/Users.js')
 var Programs_level=require("../models/Program_levels.js")
 
@@ -93,6 +94,7 @@ exports.allFormationProgramIdUser = async (req, res) => {
 
 //     res.json(apiEstructure.toResponse());
 // }
+
 exports.createFormstionPrograms = async (req, res) => {
     const apiStructure = new estructuraApi();
     try {
@@ -100,14 +102,20 @@ exports.createFormstionPrograms = async (req, res) => {
             program_name,
             program_code,
             total_duration,
-            Program_version,
-            program_start_date,
-            program_end_date,
+            program_version,
             competence,
             program_level,
             thematic_line
         } = req.body;
-        const _id = program_code
+        console.log(req.body)
+        console.log('program level')
+        console.log(program_level)
+        if (!Array.isArray(competence)) {
+            apiStructure.setStatus(400, "Info", "El campo de competencia no es un array");
+            return res.json(apiStructure.toResponse());
+        }
+        
+     
 
         //Puedes realizar la validación de la existencia de la competencia y el nivel del programa antes de crearlo
         // const existingCompetence = await Competence.findOne({ _id: competence });
@@ -123,7 +131,7 @@ exports.createFormstionPrograms = async (req, res) => {
 
         // Verifica si todas las competencias proporcionadas son válidas
         const areAllCompetencesValid = competence.every(comp => validCompetences.includes(comp));
-
+        console.log(areAllCompetencesValid)
         if (!areAllCompetencesValid) {
             apiStructure.setStatus(400, "Info", "Al menos una de las competencias proporcionadas no es válida");
             return res.json(apiStructure.toResponse());
@@ -135,20 +143,18 @@ exports.createFormstionPrograms = async (req, res) => {
             apiStructure.setStatus(400, "Info", "El nivel del programa no existe");
             return res.json(apiStructure.toResponse());
         }
-        const newFormationProgram = await Formation_programs.create({
-            _id,
+        const newFormationProgram = await Formation_program_create.create({
             program_name,
             program_code,
             total_duration,
-            Program_version,
-            program_start_date,
-            program_end_date,
+            program_version,       
             competence,
             program_level,
             thematic_line
         });
 
         apiStructure.setResult(newFormationProgram, "Programa de formación creado exitosamente");
+        return res.json(apiStructure.toResponse())
     } catch (error) {
         console.error("Error en createFormationPrograms:", error);
         apiStructure.setStatus(500, "Error interno", "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo más tarde.");
@@ -283,7 +289,7 @@ exports.allFormationProgram = async (req, res) => {
     const { id_formation_programs } = req.params;
 
     try {
-        const formationProgram = await Formation_programs.findById(id_formation_programs);
+        const formationProgram = await Formation_programs.findById(id_formation_programs).populate('competence');
 
         if (formationProgram) {
             apiStructure.setResult(formationProgram);

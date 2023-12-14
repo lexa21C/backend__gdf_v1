@@ -6,8 +6,8 @@ const { validateExistenceMiddleware} = require('../middleware/formationProgram/u
 //* Programas de Formación 
 router.get('/formation_programs', FormationPrograms.allFormationPrograms)
 router.get('/formation_program/:id_formation_programs', FormationPrograms.allFormationProgram)
-router.post('/formation_programs',validateCodeUniqueness,validateFormationProgram, FormationPrograms.createFormstionPrograms)
-router.put('/formation_programs/:id_formation_programs', validateExistenceMiddleware, validateCodeUniqueness,FormationPrograms.updateFormationPrograms)
+router.post('/formation_program', FormationPrograms.createFormstionPrograms)
+router.put('/formation_program/:id_formation_programs', validateExistenceMiddleware, validateCodeUniqueness,FormationPrograms.updateFormationPrograms)
 router.delete('/formation_programs/:id_formation_programs', FormationPrograms.deleteFormationPrograms)
 
 router.get('/formation_programs/:user_id', FormationPrograms.allFormationProgramIdUser)
