@@ -1,5 +1,5 @@
 const Formation_programs = require("../models/Formation_programs.js")
-const Formation_program_create = require("../models/create/Formation_programs.js")
+const Formation_programs = require("../models/create/Formation_programs.js")
 const Competence = require('../models/Competence.js')
 const estructuraApi = require('../helpers/responseApi.js');
 const User = require('../models/Users.js')
@@ -129,13 +129,13 @@ exports.createFormstionPrograms = async (req, res) => {
         const allCompetences = await Competence.find({});
         const validCompetences = allCompetences.map(comp => comp._id);
 
-        // Verifica si todas las competencias proporcionadas son válidas
-        const areAllCompetencesValid = competence.every(comp => validCompetences.includes(comp));
-        console.log(areAllCompetencesValid)
-        if (!areAllCompetencesValid) {
-            apiStructure.setStatus(400, "Info", "Al menos una de las competencias proporcionadas no es válida");
-            return res.json(apiStructure.toResponse());
-        }
+        // // Verifica si todas las competencias proporcionadas son válidas
+        // const areAllCompetencesValid = competence.every(comp => validCompetences.includes(comp));
+        // console.log(areAllCompetencesValid)
+        // if (!areAllCompetencesValid) {
+        //     apiStructure.setStatus(400, "Info", "Al menos una de las competencias proporcionadas no es válida");
+        //     return res.json(apiStructure.toResponse());
+        // }
 
         const existingProgramLevel = await Programs_level.findOne({ _id: program_level });
 
@@ -238,7 +238,7 @@ exports.updateFormationPrograms = async (req, res) => {
 exports.deleteFormationPrograms = async (req, res) => {
     const apiStructure = new estructuraApi();
     try {
-        const idFormationPrograms = req.params.id_formation_programs;
+        const idFormationPrograms = req.params.id_formation_program;
 
         const formationPrograms = await Formation_programs.findById(idFormationPrograms);
         if (formationPrograms) {
@@ -286,10 +286,10 @@ exports.deleteFormationPrograms = async (req, res) => {
 
 exports.allFormationProgram = async (req, res) => {
     const apiStructure = new estructuraApi();
-    const { id_formation_programs } = req.params;
+    const { id_formation_program } = req.params;
 
     try {
-        const formationProgram = await Formation_programs.findById(id_formation_programs).populate('competence');
+        const formationProgram = await Formation_programs.findById(id_formation_program).populate('competence');
 
         if (formationProgram) {
             apiStructure.setResult(formationProgram);

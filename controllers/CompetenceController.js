@@ -1,3 +1,4 @@
+const CompetenceCreate = require('../models/create/competence_create.js')
 const Competence = require('../models/Competence.js')
 const Formation_programs = require('../models/Formation_programs.js')
 const ApiStructure = require('../helpers/responseApi.js')
@@ -58,7 +59,7 @@ exports.createCompetences = async (req, res) => {
         // quarter,
         // program
     } = req.body;
-    const _id = labor_competence_code
+
 
     // let arrayF = []
     // for (let i = 0; i < formation_programs.length; i++) {
@@ -72,8 +73,7 @@ exports.createCompetences = async (req, res) => {
     // res.json(foundformation_programs._id)
 
     try {
-        const createdCompetence = await Competence.create({
-            _id,
+        const createdCompetence = await CompetenceCreate.create({
             labor_competition,
             labor_competence_code,
             program_competition,

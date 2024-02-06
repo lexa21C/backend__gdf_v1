@@ -1,7 +1,7 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 
-var Formation_program = Schema({
+var Formation_programs = Schema({
     _id: String,
     program_name: String,
     program_code: Number,
@@ -32,4 +32,4 @@ var Formation_program = Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Formation_programs', Formation_program)
+module.exports = mongoose.model('Formation_programs', Formation_programs)

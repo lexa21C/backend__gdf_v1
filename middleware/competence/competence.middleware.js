@@ -34,19 +34,17 @@ const validateCompetence = async (req, res, next) => {
             .trim()
             .notEmpty().withMessage('El campo "código de competencia laboral" es obligatorio.')
             .isNumeric().withMessage('El campo "código de competencia laboral" debe ser un valor numérico.'),
-        check("competition_name")
-            .trim()
-            .notEmpty().withMessage('El campo  "nombre de la competencia"  es obligatorio.')
-            .isString().withMessage('El campo "nombre de la competencia"  debe ser una cadena de caracteres.'),
+        // check("competition_name")
+        //     .trim()
+        //     .notEmpty().withMessage('El campo  "nombre de la competencia"  es obligatorio.')
+        //     .isString().withMessage('El campo "nombre de la competencia"  debe ser una cadena de caracteres.'),
         check("labor_competition_version")
             .trim()
             .notEmpty().withMessage('El campo "versión de competencia laboral" es obligatorio')
             .isString().withMessage('El campo "versión de competencia laboral" debe ser una cadena de caracteres.'),
         check("estimated_duration")
             .isString().withMessage('El campo "duracion estimada" debe ser una cadena de caracteres.'),
-        check("program")
-            .trim()
-            .notEmpty().withMessage('El campo "programa de formacion" es obligatatorio.')
+
     ]
 
     Promise.all(competence.map(validation => validation.run(req)))

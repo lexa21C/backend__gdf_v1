@@ -1,7 +1,8 @@
 var mongoose = require('mongoose')
+const Formation_programs = require('../Formation_programs')
 var Schema = mongoose.Schema
 
-var Formation_program = Schema({
+var Formation_programs = Schema({
     program_name: String,
     program_code: Number,
     number_quarters: Number,
@@ -31,4 +32,4 @@ var Formation_program = Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Formation_programs_create', Formation_program)
+module.exports = mongoose.model('Formation_programs_create', Formation_programs)
